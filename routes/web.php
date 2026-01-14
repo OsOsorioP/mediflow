@@ -21,6 +21,10 @@ Route::middleware(['auth', 'tenant', 'verified'])->group(function () {
     Route::get('/patients/create', \App\Livewire\Patients\Create::class)->name('patients.create');
 
     Route::get('/patients/{patient}', PatientsShow::class)->name('patients.show');
+
+    Route::get('/patients/{patient}/edit', \App\Livewire\Patients\Edit::class)->name('patients.edit');
+
+    Route::get('/patients/{patient}/medical-records/create', \App\Livewire\MedicalRecords\Create::class)->name('medical-records.create');
 });
 
 require __DIR__.'/auth.php';
