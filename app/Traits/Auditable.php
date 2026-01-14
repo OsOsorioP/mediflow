@@ -99,8 +99,15 @@ trait Auditable
             return null;
         }
 
-        // Lista de campos que NO deben auditarse (demasiado sensibles)
-        $sensitiveFields = ['password', 'remember_token'];
+        $sensitiveFields = [
+            'password', 
+            'remember_token',
+            'symptoms', 
+            'diagnosis', 
+            'treatment_plan', 
+            'prescriptions', 
+            'clinical_notes'
+        ];
 
         return collect($data)
             ->except($sensitiveFields)

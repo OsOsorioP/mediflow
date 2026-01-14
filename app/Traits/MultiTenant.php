@@ -5,61 +5,46 @@ declare(strict_types=1);
 namespace App\Traits;
 
 use App\Models\Clinic;
+use App\Models\Scopes\ClinicScope;
+use App\Services\TenantManager;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-/**
- * @property int $clinic_id
- *
- * @method static static|\Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Query\Builder query()
- */
 trait MultiTenant
 {
     /**
-     * Boot del trait - Se ejecuta cuando el Model se inicializa
+     * Boot del trait. Laravel lo llama automáticamente.
      */
     protected static function bootMultiTenant(): void
     {
-        // Automáticamente asignar clinic_id al crear un registro
-        static::creating(function (Model $model) {
-            if (! $model->clinic_id && auth()->check()) {
-                $model->clinic_id = auth()->user()->clinic_id;
-            }
-        });
+        // Aplicamos el Scope que creamos en el Paso 3
+        static::addGlobalScope(new ClinicScope());
 
-        // Global Scope: Filtrar TODOS los queries por clinic_id automáticamente
-        static::addGlobalScope('clinic', function (Builder $builder) {
-            if (auth()->check()) {
-                $builder->where(
-                    $builder->getQuery()->from.'.clinic_id',
-                    auth()->user()->clinic_id
-                );
+        // Al crear un registro, asignamos automáticamente el clinic_id
+        static::creating(function (Model $model) {
+            $manager = app(TenantManager::class);
+
+            if ($manager->hasClinic() && ! $model->clinic_id) {
+                $model->clinic_id = $manager->getClinicId();
+            }
+
+            if (! $model->clinic_id) {
+                throw new \Exception("Error Crítico: No se pudo determinar la clínica para el registro de " . get_class($model));
             }
         });
     }
 
-    /**
-     * Relación: Pertenece a una clínica
-     */
     public function clinic(): BelongsTo
     {
         return $this->belongsTo(Clinic::class);
     }
 
     /**
-     * Scope para bypassear el filtro de tenant (usar con MUCHO cuidado)
-     * Uso: Patient::withoutGlobalScope('clinic')->get()
-     *
-     * Solo debe usarse en:
-     * - Comandos de consola administrativos
-     * - Reportes super-admin cross-clinic
-     * - Migraciones de datos
-     *
-     * @param  Builder<Model>  $query
+     * Scope para ignorar el filtro (útil para reportes admin)
      */
     public function scopeAllClinics(Builder $query): Builder
     {
-        return $query->withoutGlobalScope('clinic');
+        return $query->withoutGlobalScope(ClinicScope::class);
     }
 }
