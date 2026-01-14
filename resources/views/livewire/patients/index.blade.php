@@ -141,12 +141,12 @@
                                 @endcan
 
                                 @can('update', $patient)
-                                    <button 
-                                        wire:click="$dispatch('openModal', { component: 'patients.edit', arguments: { patientId: {{ $patient->id }} } })"
-                                        class="text-indigo-600 hover:text-indigo-900">
-                                        Editar
-                                    </button>
-                                @endcan
+    <a href="{{ route('patients.edit', $patient) }}" 
+       wire:navigate
+       class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">
+        Editar
+    </a>
+@endcan
 
                                 @can('archive', $patient)
                                     <button 

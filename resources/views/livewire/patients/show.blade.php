@@ -34,11 +34,11 @@
             {{-- Acciones --}}
             <div class="flex gap-2">
                 @can('update', $patient)
-                    <button 
-                        wire:click="$dispatch('openModal', { component: 'patients.edit', arguments: { patientId: {{ $patient->id }} } })"
-                        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                    <a href="{{ route('patients.edit', $patient) }}"
+                        wire:navigate
+                        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer">
                         Editar Paciente
-                    </button>
+                    </a>
                 @endcan
 
                 <a href="{{ route('patients.index') }}" 
@@ -199,11 +199,11 @@
             <div class="p-6 border-b border-gray-200 flex justify-between items-center">
                 <h3 class="text-lg font-semibold text-gray-900">Expediente Médico</h3>
                 @can('create', App\Models\MedicalRecord::class)
-                    <button 
-                        wire:click="$dispatch('openModal', { component: 'medical-records.create', arguments: { patientId: {{ $patient->id }} } })"
+                    <a href="{{ route('medical-records.create', $patient) }}" 
+                        wire:navigate
                         class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
                         + Nuevo Registro
-                    </button>
+                    </a>
                 @endcan
             </div>
 

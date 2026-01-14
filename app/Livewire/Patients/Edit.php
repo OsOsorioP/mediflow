@@ -5,15 +5,15 @@ declare(strict_types=1);
 namespace App\Livewire\Patients;
 
 use App\Models\Patient;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use App\Services\TenantManager;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Livewire\Component;
+use Livewire\Attributes\Layout;
 
+#[Layout('layouts.app')] // Aseguramos el layout
 class Edit extends Component
 {
-    use AuthorizesRequests;
-
     public Patient $patient;
 
     // Propiedades del formulario
@@ -35,37 +35,24 @@ class Edit extends Component
     public string $notes = '';
 
     /**
-     * Mount - Cargar datos del paciente
+     * Mount - Laravel inyecta el modelo Patient automáticamente por la URL
      */
-    public function mount(int $patientId): void
+    public function mount(Patient $patient): void
     {
-        $this->patient = Patient::findOrFail($patientId);
-        $this->authorize('update', $this->patient);
+        $this->authorize('update', $patient);
+        $this->patient = $patient;
 
-        // Cargar datos actuales
-        $this->first_name = $this->patient->first_name;
-        $this->last_name = $this->patient->last_name;
-        $this->identification_type = $this->patient->identification_type;
-        $this->identification_number = $this->patient->identification_number;
-        $this->date_of_birth = $this->patient->date_of_birth->format('Y-m-d');
-        $this->gender = $this->patient->gender ?? '';
-        $this->blood_type = $this->patient->blood_type ?? '';
-        $this->email = $this->patient->email ?? '';
-        $this->phone = $this->patient->phone;
-        $this->mobile_phone = $this->patient->mobile_phone ?? '';
-        $this->address = $this->patient->address ?? '';
-        $this->city = $this->patient->city ?? '';
-        $this->emergency_contact_name = $this->patient->emergency_contact_name ?? '';
-        $this->emergency_contact_phone = $this->patient->emergency_contact_phone ?? '';
-        $this->emergency_contact_relationship = $this->patient->emergency_contact_relationship ?? '';
-        $this->notes = $this->patient->notes ?? '';
+        // Llenar las propiedades con los datos del modelo
+        $this->fill($patient->toArray());
+        
+        // Formatear fecha para el input date de HTML
+        $this->date_of_birth = $patient->date_of_birth->format('Y-m-d');
     }
 
-    /**
-     * Reglas de validación
-     */
     protected function rules(): array
     {
+        $clinicId = app(TenantManager::class)->getClinicId();
+
         return [
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
@@ -74,7 +61,10 @@ class Edit extends Component
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('patients', 'identification_number')->ignore($this->patient->id),
+                // Único en la clínica, ignorando al paciente actual
+                Rule::unique('patients')
+                    ->where(fn ($q) => $q->where('clinic_id', $clinicId))
+                    ->ignore($this->patient->id),
             ],
             'date_of_birth' => 'required|date|before:today',
             'gender' => 'nullable|in:M,F,O',
@@ -91,52 +81,19 @@ class Edit extends Component
         ];
     }
 
-    /**
-     * Mensajes de validación
-     */
-    protected function messages(): array
-    {
-        return [
-            'first_name.required' => 'El nombre es obligatorio',
-            'last_name.required' => 'El apellido es obligatorio',
-            'identification_number.required' => 'El número de documento es obligatorio',
-            'identification_number.unique' => 'Ya existe un paciente con este documento',
-            'date_of_birth.required' => 'La fecha de nacimiento es obligatoria',
-            'date_of_birth.before' => 'La fecha de nacimiento debe ser anterior a hoy',
-            'phone.required' => 'El teléfono es obligatorio',
-            'email.email' => 'El email no tiene un formato válido',
-        ];
-    }
-
-    /**
-     * Validación en tiempo real
-     */
-    public function updated($propertyName): void
-    {
-        $this->validateOnly($propertyName);
-    }
-
-    /**
-     * Actualizar paciente
-     */
-    public function save(): void
+    public function save()
     {
         $this->authorize('update', $this->patient);
-
         $validated = $this->validate();
 
         $this->patient->update($validated);
 
-        // Emitir eventos
-        $this->dispatch('patientUpdated');
-        $this->dispatch('closeModal');
-
         session()->flash('message', 'Paciente actualizado correctamente');
+        
+        // Redirigir al listado o al perfil del paciente
+        return $this->redirect(route('patients.show', $this->patient), navigate: true);
     }
 
-    /**
-     * Renderizar componente
-     */
     public function render(): View
     {
         return view('livewire.patients.edit');

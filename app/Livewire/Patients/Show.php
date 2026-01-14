@@ -9,10 +9,13 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\View\View;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Livewire\Attributes\Layout;
 
 class Show extends Component
 {
     use WithPagination, AuthorizesRequests;
+
+    #[Layout('layouts.app')]
 
     public Patient $patient;
     public string $activeTab = 'info'; // info, medical_records, audit
