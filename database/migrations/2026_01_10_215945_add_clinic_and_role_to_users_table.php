@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
@@ -17,25 +14,22 @@ return new class extends Migration
                 ->after('id')
                 ->constrained()
                 ->cascadeOnDelete(); // Si se elimina la clínica, eliminar usuarios
-
+            
             // Rol del usuario dentro de su clínica
             $table->string('role')
                 ->after('clinic_id')
                 ->default('assistant'); // Por defecto, asistente
-
+            
             // Información adicional
             $table->string('phone')->nullable()->after('email');
             $table->boolean('is_active')->default(true)->after('phone');
-
+            
             // Índices para mejorar rendimiento en consultas frecuentes
             $table->index(['clinic_id', 'role']);
             $table->index('is_active');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
