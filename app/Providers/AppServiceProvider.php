@@ -6,6 +6,7 @@ namespace App\Providers;
 
 use App\Enums\UserRole;
 use App\Models\User;
+use App\Services\TenantManager;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
@@ -16,7 +17,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(TenantManager::class);
     }
 
     /**
@@ -24,6 +25,23 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Gate::before(function (User $user, string $ability) {
+
+            // REGLA DE ORO: Si el usuario no está activo, no tiene permisos para NADA
+            if (! $user->is_active) {
+                return false;
+            }
+
+            // Si es Admin, tiene super-poderes (excepto quizás editar perfiles ajenos)
+            if ($user->isAdmin() && $ability !== 'update-profile') {
+                return true;
+            }
+
+            // Si no es admin o es una habilidad específica, Laravel continuará 
+            // revisando las Policies normales.
+            return null;
+        });
+
         // Gate: Solo admins pueden gestionar usuarios
         Gate::define('manage-users', function (User $user) {
             return $user->role === UserRole::ADMIN;

@@ -5,7 +5,11 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Models\User;
+use App\Models\Patient;
+use App\Models\MedicalRecord;
 use App\Policies\UserPolicy;
+use App\Policies\PatientPolicy;
+use APP\Policies\MedicalRecordPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
