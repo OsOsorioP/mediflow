@@ -1,5 +1,5 @@
 <div class="p-6">
-    <h3 class="text-lg font-semibold text-gray-900 mb-6">Crear Nuevo Paciente</h3>
+    <h3 class="text-lg font-semibold text-gray-900 mb-6">Editar Paciente</h3>
 
     <form wire:submit="save">
         {{-- Información Personal --}}
@@ -283,7 +283,7 @@
                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
             @enderror
         </div>
-
+        
         {{-- Botones --}}
         <div class="flex justify-end gap-3 pt-4 border-t">
             <button 
@@ -298,7 +298,7 @@
                 class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                 wire:loading.attr="disabled"
             >
-                <span wire:loading.remove>Crear Paciente</span>
+                <span wire:loading.remove>Actualizar Paciente</span>
                 <span wire:loading>Guardando...</span>
             </button>
         </div>

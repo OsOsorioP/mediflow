@@ -7,12 +7,16 @@ namespace App\Livewire\Patients;
 use App\Models\Patient;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\View\View;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Livewire\Attributes\Layout;
 
 class Index extends Component
 {
     use WithPagination, AuthorizesRequests;
+
+    #[Layout('layouts.app')] 
 
     // Propiedades públicas (son reactivas)
     public string $search = '';
@@ -20,9 +24,17 @@ class Index extends Component
     public bool $filterActive = true;
     public string $sortField = 'created_at';
     public string $sortDirection = 'desc';
+    public bool $showCreateModal = false;
 
     // Listeners para eventos de otros componentes
     protected $listeners = ['patientCreated' => '$refresh', 'patientUpdated' => '$refresh'];
+
+    #[On('closeModal')] 
+    public function closeModal(): void
+    {
+        $this->showCreateModal = false;
+        $this->dispatch('patient-created'); // Opcional: notificación
+    }
 
     /**
      * Resetear paginación cuando cambia la búsqueda

@@ -10,13 +10,13 @@ enum UserRole: string
     case ASSISTANT = 'assistant';
 
     /**
-     * Obtiene un label para texto amigable para mostrar en interfaces
+     * Obtiene un label legible para humanos
      */
     public function label(): string
     {
-        return match ($this) {
+        return match($this) {
             self::ADMIN => 'Administrador (Médico)',
-            self::ASSISTANT => 'Asistente (Secretaria)'
+            self::ASSISTANT => 'Asistente (Secretaria)',
         };
     }
 
@@ -37,9 +37,7 @@ enum UserRole: string
     }
 
     /**
-     * Obtiene un array para usar en selects de formulario
-     *
-     * @return array<string, string>
+     * Obtiene un array para usar en selects de formularios
      */
     public static function options(): array
     {
@@ -47,7 +45,6 @@ enum UserRole: string
         foreach (self::cases() as $role) {
             $options[$role->value] = $role->label();
         }
-
         return $options;
     }
 }
