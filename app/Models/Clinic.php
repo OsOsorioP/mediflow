@@ -9,14 +9,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-/**
- * @property int $id
- * @property string $name
- * @property string $slug
- * @property bool $is_active
- *
- * @use HasFactory<\Database\Factories\ClinicFactory>
- */
 class Clinic extends Model
 {
     use HasFactory, SoftDeletes;
@@ -73,12 +65,18 @@ class Clinic extends Model
 
     /**
      * Verifica si la clínica puede agregar más pacientes
-     * (Implementaremos la relación con Patient en fases posteriores)
      */
     public function canAddPatient(): bool
     {
-        // Por ahora retornamos true, lo completaremos en Fase 2
-        return true;
+        return $this->patients()->count() < $this->max_patients;
+    }
+
+    /**
+     * Relación: Una clínica tiene muchos pacientes
+     */
+    public function patients(): HasMany
+    {
+        return $this->hasMany(Patient::class);
     }
 
     /**

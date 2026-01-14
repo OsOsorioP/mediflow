@@ -6,28 +6,21 @@ namespace App\Models;
 
 use App\Enums\UserRole;
 use App\Traits\MultiTenant;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 /**
- * @property int $id
- * @property int $clinic_id
- * @property string $name
- * @property string $email
- * @property \App\Enums\UserRole $role
- * @property bool $is_active
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\Clinic|null $clinic
- *
- * @use HasFactory<\Database\Factories\UserFactory>
+ * Sobrescribir el método can para verificar si el usuario está activo.
+ * 
+ * @param string|iterable $abilities
+ * @param array|mixed $arguments
+ * @return bool
  */
-class User extends Authenticatable implements MustVerifyEmail
+class User extends Authenticatable
 {
-    use HasFactory, MultiTenant, Notifiable;
+    use HasFactory, Notifiable, MultiTenant;
 
     /**
      * Atributos asignables masivamente
@@ -58,7 +51,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'role' => \App\Enums\UserRole::class, // Automáticamente convierte string a Enum
+            'role' => UserRole::class, // Automáticamente convierte string a Enum
             'is_active' => 'boolean',
         ];
     }
@@ -90,21 +83,19 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * Verifica si el usuario puede realizar una acción específica
      * (Esto se complementará con Policies en pasos siguientes)
-     * public function can(string $ability, mixed $arguments = []): bool
-     * {
-     *   // Si no está activo, no puede hacer nada
-     *   if (!$this->is_active) {
-     *       return false;
-     *   }
-     *
-     *    return parent::can($ability, $arguments);
-     * }
      */
+    public function can($abilities, $arguments = []): bool
+    {
+        // Si el usuario no está activo, denegar cualquier permiso automáticamente
+        if (! $this->is_active) {
+            return false;
+        }
+
+        return parent::can($abilities, $arguments);
+    }
 
     /**
      * Scope: Filtrar solo usuarios activos
-     *
-     * @param  Builder<User>  $query
      */
     public function scopeActive($query)
     {
@@ -114,8 +105,6 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * Scope: Filtrar por rol
      * Uso: User::role(UserRole::ADMIN)->get()
-     *
-     * @param  Builder<User>  $query
      */
     public function scopeRole($query, UserRole $role)
     {
