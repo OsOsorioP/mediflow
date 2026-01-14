@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Services\TenantManager;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * Middleware: EnsureTenantContext
@@ -23,40 +25,49 @@ class EnsureTenantContext
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Si no hay usuario autenticado, continuar (el middleware 'auth' se encarga)
-        if (! $request->user()) {
+        // 1. Obtener el usuario de la request
+        $user = $request->user();
+
+        // Si no hay usuario autenticado, continuar (el middleware 'auth' se encargará después)
+        if (! $user) {
             return $next($request);
         }
 
-        $user = $request->user();
-
-        // Verificar que el usuario tenga una clínica asignada
-        if (! $user->clinic_id) {
-            abort(403, 'Usuario sin clínica asignada. Contacte al administrador.');
+        // 2. Establecer el ID de la clínica en el TenantManager (Paso vital para el Global Scope)
+        if ($user->clinic_id) {
+            app(TenantManager::class)->setClinicId($user->clinic_id);
+        } else {
+            // Si el usuario no tiene clínica, es un error de configuración de cuenta
+            Auth::logout();
+            return redirect()->route('login')
+                ->withErrors(['email' => 'Tu cuenta no tiene una clínica asignada.']);
         }
 
-        // Verificar que el usuario esté activo
+        // 3. Verificar si el usuario está activo
         if (! $user->is_active) {
-            auth()->logout();
+            Auth::logout(); // <-- Cambiado de auth()->logout() a Auth::logout()
+            
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
 
             return redirect()->route('login')
                 ->withErrors(['email' => 'Tu cuenta ha sido desactivada. Contacta al administrador.']);
         }
 
-        // Cargar la relación de clínica si no está cargada (optimización)
-        if (! $user->relationLoaded('clinic')) {
-            $user->load('clinic');
-        }
+        // 4. Cargar y verificar la clínica
+        $user->loadMissing('clinic');
 
-        // Verificar que la clínica esté activa
         if (! $user->clinic || ! $user->clinic->is_active) {
-            auth()->logout();
+            Auth::logout(); // <-- Cambiado de auth()->logout() a Auth::logout()
+            
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
 
             return redirect()->route('login')
-                ->withErrors(['email' => 'La clínica ha sido suspendida. Contacta a soporte.']);
+                ->withErrors(['email' => 'La clínica se encuentra inactiva o suspendida.']);
         }
 
-        // Opcional: Compartir la clínica con todas las vistas
+        // 5. Compartir la clínica con todas las vistas (opcional, muy útil para Blade)
         view()->share('currentClinic', $user->clinic);
 
         return $next($request);
