@@ -234,21 +234,19 @@
 
         {{-- Botones --}}
         <div class="flex justify-end gap-3 pt-4 border-t sticky bottom-0 bg-white">
-            <button 
-                type="button"
-                wire:click="$dispatch('closeModal')"
-                class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
-            >
-                Cancelar
-            </button>
-            <button 
-                type="submit"
-                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                wire:loading.attr="disabled"
-            >
-                <span wire:loading.remove>Guardar Registro</span>
-                <span wire:loading>Guardando...</span>
-            </button>
-        </div>
+    <a href="{{ route('patients.show', $patient) }}" 
+       wire:navigate
+       class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+        Cancelar
+    </a>
+    <button 
+        type="submit"
+        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer"
+        wire:loading.attr="disabled"
+    >
+        <span wire:loading.remove>Guardar Registro</span>
+        <span wire:loading>Guardando...</span>
+    </button>
+</div>
     </form>
 </div>

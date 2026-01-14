@@ -7,14 +7,14 @@ namespace App\Livewire\MedicalRecords;
 use App\Enums\MedicalRecordType;
 use App\Models\MedicalRecord;
 use App\Models\Patient;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Auth; // Importar Auth
 use Illuminate\View\View;
 use Livewire\Component;
+use Livewire\Attributes\Layout; // Importar Layout
 
+#[Layout('layouts.app')] // Asegurar el layout de Breeze
 class Create extends Component
 {
-    use AuthorizesRequests;
-
     public Patient $patient;
 
     // Propiedades del formulario
@@ -26,27 +26,22 @@ class Create extends Component
     public string $prescriptions = '';
     public string $clinical_notes = '';
     public string $consultation_date = '';
-    public string $weight = '';
-    public string $height = '';
+    public ?float $weight = null; // Cambiado a null para mejor manejo de tipos
+    public ?float $height = null;
     public string $blood_pressure = '';
-    public string $temperature = '';
-    public string $heart_rate = '';
+    public ?float $temperature = null;
+    public ?int $heart_rate = null;
 
     /**
-     * Mount
+     * Mount - Laravel inyecta el modelo Patient automáticamente
      */
-    public function mount(int $patientId): void
+    public function mount(Patient $patient): void
     {
-        $this->patient = Patient::findOrFail($patientId);
-        $this->authorize('viewMedicalRecords', $this->patient);
-        
-        // Fecha por defecto: hoy
+        // El Global Scope ya protege que el paciente sea de la clínica correcta
+        $this->patient = $patient;
         $this->consultation_date = now()->format('Y-m-d');
     }
 
-    /**
-     * Reglas de validación
-     */
     protected function rules(): array
     {
         return [
@@ -66,55 +61,24 @@ class Create extends Component
         ];
     }
 
-    /**
-     * Mensajes de validación
-     */
-    protected function messages(): array
-    {
-        return [
-            'symptoms.required' => 'Los síntomas son obligatorios',
-            'diagnosis.required' => 'El diagnóstico es obligatorio',
-            'clinical_notes.required' => 'Las notas clínicas son obligatorias',
-            'consultation_date.required' => 'La fecha de consulta es obligatoria',
-            'consultation_date.before_or_equal' => 'La fecha no puede ser futura',
-            'weight.numeric' => 'El peso debe ser un número',
-            'height.numeric' => 'La altura debe ser un número',
-            'temperature.between' => 'La temperatura debe estar entre 30 y 45°C',
-        ];
-    }
-
-    /**
-     * Validación en tiempo real
-     */
-    public function updated($propertyName): void
-    {
-        $this->validateOnly($propertyName);
-    }
-
-    /**
-     * Guardar registro médico
-     */
-    public function save(): void
+    public function save()
     {
         $this->authorize('create', MedicalRecord::class);
-
         $validated = $this->validate();
 
-        // Agregar campos adicionales
+        // Asignaciones manuales necesarias
         $validated['patient_id'] = $this->patient->id;
-        $validated['created_by'] = auth()->user()->id;
+        $validated['created_by'] = Auth::id(); // Uso de Facade (Senior Practice)
 
-        MedicalRecord::create($validated);
+        // El clinic_id se asigna solo gracias al Trait MultiTenant
+        $record = MedicalRecord::create($validated);
 
-        $this->dispatch('medicalRecordCreated');
-        $this->dispatch('closeModal');
+        session()->flash('message', 'Registro médico guardado correctamente.');
 
-        session()->flash('message', 'Registro médico creado correctamente');
+        // Redirigimos de vuelta al perfil del paciente, pestaña de registros
+        return $this->redirect(route('patients.show', $this->patient), navigate: true);
     }
 
-    /**
-     * Renderizar componente
-     */
     public function render(): View
     {
         return view('livewire.medical-records.create', [
