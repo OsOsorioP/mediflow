@@ -9,9 +9,9 @@
 
 ## 📋 Descripción
 
-MediFlow es una aplicación web SaaS desarrollada con Laravel 11 y PHP 8.3+ que permite a profesionales de la salud independientes gestionar sus consultorios de forma eficiente y segura.
+MediFlow es una aplicación web SaaS desarrollada con Laravel 12 y PHP 8.3+ que permite a profesionales de la salud independientes gestionar sus consultorios de forma eficiente y segura.
 
-## ✨ Características Principales
+## Features
 
 ### Gestión de Pacientes
 - CRUD completo de pacientes
@@ -49,13 +49,13 @@ MediFlow es una aplicación web SaaS desarrollada con Laravel 11 y PHP 8.3+ que 
 
 ## 🛠️ Stack Tecnológico
 
-- **Backend**: PHP 8.3+, Laravel 11
+- **Backend**: PHP 8.3+, Laravel 12
 - **Frontend**: Laravel Livewire 3, Tailwind CSS
 - **Base de Datos**: PostgreSQL
 - **Queue**: Database driver
 - **PDF**: DomPDF
 - **Testing**: Pest PHP
-- **Quality**: PHPStan (nivel 6), Laravel Pint
+- **Quality**: PHPStan (nivel 8), Laravel Pint
 
 ## 📦 Instalación
 
@@ -68,7 +68,7 @@ MediFlow es una aplicación web SaaS desarrollada con Laravel 11 y PHP 8.3+ que 
 
 ```bash
 # Clonar el repositorio
-git clone https://github.com/tu-usuario/mediflow.git
+git clone https://github.com/OsOsorioP/mediflow.git
 cd mediflow
 
 # Copiar el archivo de configuración
