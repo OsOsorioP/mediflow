@@ -98,4 +98,20 @@ class Clinic extends Model
         $this->settings = $settings;
         $this->save();
     }
+
+    /**
+     * Relación: Una clínica tiene muchos horarios de atención
+     */
+    public function workingHours(): HasMany
+    {
+        return $this->hasMany(WorkingHours::class);
+    }
+
+    /**
+     * Relación: Una clínica tiene muchas citas
+     */
+    public function appointments(): HasMany
+    {
+        return $this->hasMany(Appointment::class);
+    }
 }

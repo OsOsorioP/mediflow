@@ -88,10 +88,10 @@ class Patient extends Model
     {
         return $query->where(function ($q) use ($search) {
             $q->where('first_name', 'ilike', "%{$search}%")
-              ->orWhere('last_name', 'ilike', "%{$search}%")
-              ->orWhere('identification_number', 'like', "%{$search}%")
-              ->orWhere('email', 'ilike', "%{$search}%")
-              ->orWhere('phone', 'like', "%{$search}%");
+                ->orWhere('last_name', 'ilike', "%{$search}%")
+                ->orWhere('identification_number', 'like', "%{$search}%")
+                ->orWhere('email', 'ilike', "%{$search}%")
+                ->orWhere('phone', 'like', "%{$search}%");
         });
     }
 
@@ -119,5 +119,13 @@ class Patient extends Model
     public function getTotalConsultationsAttribute(): int
     {
         return $this->medicalRecords()->count();
+    }
+
+    /**
+     * Relación: Un paciente tiene muchas citas
+     */
+    public function appointments(): HasMany
+    {
+        return $this->hasMany(Appointment::class);
     }
 }

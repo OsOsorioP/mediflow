@@ -200,7 +200,13 @@ class Appointment extends Model
             return false;
         }
 
-        return $this->update(['status' => AppointmentStatus::CONFIRMED]);
+        $result = $this->update(['status' => AppointmentStatus::CONFIRMED]);
+
+        if ($result) {
+            event(new \App\Events\AppointmentConfirmed($this));
+        }
+
+        return $result;
     }
 
     /**

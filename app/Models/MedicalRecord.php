@@ -85,8 +85,8 @@ class MedicalRecord extends Model
     protected function symptoms(): Attribute
     {
         return Attribute::make(
-            get: fn (?string $value) => $value ? Crypt::decryptString($value) : null,
-            set: fn (?string $value) => $value ? Crypt::encryptString($value) : null,
+            get: fn(?string $value) => $value ? Crypt::decryptString($value) : null,
+            set: fn(?string $value) => $value ? Crypt::encryptString($value) : null,
         );
     }
 
@@ -96,8 +96,8 @@ class MedicalRecord extends Model
     protected function diagnosis(): Attribute
     {
         return Attribute::make(
-            get: fn (?string $value) => $value ? Crypt::decryptString($value) : null,
-            set: fn (?string $value) => $value ? Crypt::encryptString($value) : null,
+            get: fn(?string $value) => $value ? Crypt::decryptString($value) : null,
+            set: fn(?string $value) => $value ? Crypt::encryptString($value) : null,
         );
     }
 
@@ -107,8 +107,8 @@ class MedicalRecord extends Model
     protected function treatmentPlan(): Attribute
     {
         return Attribute::make(
-            get: fn (?string $value) => $value ? Crypt::decryptString($value) : null,
-            set: fn (?string $value) => $value ? Crypt::encryptString($value) : null,
+            get: fn(?string $value) => $value ? Crypt::decryptString($value) : null,
+            set: fn(?string $value) => $value ? Crypt::encryptString($value) : null,
         );
     }
 
@@ -118,8 +118,8 @@ class MedicalRecord extends Model
     protected function prescriptions(): Attribute
     {
         return Attribute::make(
-            get: fn (?string $value) => $value ? Crypt::decryptString($value) : null,
-            set: fn (?string $value) => $value ? Crypt::encryptString($value) : null,
+            get: fn(?string $value) => $value ? Crypt::decryptString($value) : null,
+            set: fn(?string $value) => $value ? Crypt::encryptString($value) : null,
         );
     }
 
@@ -129,8 +129,8 @@ class MedicalRecord extends Model
     protected function clinicalNotes(): Attribute
     {
         return Attribute::make(
-            get: fn (?string $value) => $value ? Crypt::decryptString($value) : null,
-            set: fn (?string $value) => $value ? Crypt::encryptString($value) : null,
+            get: fn(?string $value) => $value ? Crypt::decryptString($value) : null,
+            set: fn(?string $value) => $value ? Crypt::encryptString($value) : null,
         );
     }
 
