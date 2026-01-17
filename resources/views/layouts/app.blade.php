@@ -32,5 +32,8 @@
                 {{ $slot }}
             </main>
         </div>
+        <x-toast />
+        @livewireScripts
+        @livewire('wire-elements-modal')
     </body>
 </html>
