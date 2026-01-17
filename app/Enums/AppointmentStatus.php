@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Enums;
 
+/**
+ * Define los estados posibles de una cita médica.
+ */
 enum AppointmentStatus: string
 {
     case PENDING = 'pending';
