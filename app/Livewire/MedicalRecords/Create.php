@@ -7,33 +7,111 @@ namespace App\Livewire\MedicalRecords;
 use App\Enums\MedicalRecordType;
 use App\Models\MedicalRecord;
 use App\Models\Patient;
-use Illuminate\Support\Facades\Auth; // Importar Auth
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 use Livewire\Component;
-use Livewire\Attributes\Layout; // Importar Layout
+use Livewire\Attributes\Layout;
 
-#[Layout('layouts.app')] // Asegurar el layout de Breeze
+#[Layout('layouts.app')]
+/**
+ * Componente para la creación de historiales médicos.
+ * 
+ * Este componente permite registrar diferentes tipos de antecedentes
+ * médicos para un paciente específico, incluyendo consultas,
+ * diagnósticos y tratamientos.
+ */
 class Create extends Component
 {
+    /**
+     * El paciente al cual se le creará el registro médico.
+     * @var Patient
+     */
     public Patient $patient;
 
     // Propiedades del formulario
+
+    /**
+     * Tipo de registro médico (ej. consulta, examen, etc.)
+     * @var string
+     */
     public string $record_type = 'consultation';
+
+    /**
+     * Motivo principal de la consulta.
+     * @var string
+     */
     public string $chief_complaint = '';
+
+    /**
+     * Descripción detallada de los síntomas presentados.
+     * @var string
+     */
     public string $symptoms = '';
+
+    /**
+     * Diagnóstico médico realizado.
+     * @var string
+     */
     public string $diagnosis = '';
+
+    /**
+     * Plan de tratamiento propuesto.
+     * @var string
+     */
     public string $treatment_plan = '';
+
+    /**
+     * Medicamentos recetados.
+     * @var string
+     */
     public string $prescriptions = '';
+
+    /**
+     * Notas clínicas adicionales.
+     * @var string
+     */
     public string $clinical_notes = '';
+
+    /**
+     * Fecha de la consulta.
+     * @var string
+     */
     public string $consultation_date = '';
-    public ?float $weight = null; // Cambiado a null para mejor manejo de tipos
+
+    /**
+     * Peso del paciente en kg.
+     * @var float|null
+     */
+    public ?float $weight = null;
+
+    /**
+     * Altura del paciente en cm.
+     * @var float|null
+     */
     public ?float $height = null;
+
+    /**
+     * Presión arterial (ej. 120/80).
+     * @var string
+     */
     public string $blood_pressure = '';
+
+    /**
+     * Temperatura corporal en grados Celsius.
+     * @var float|null
+     */
     public ?float $temperature = null;
+
+    /**
+     * Frecuencia cardíaca en latidos por minuto.
+     * @var int|null
+     */
     public ?int $heart_rate = null;
 
     /**
-     * Mount - Laravel inyecta el modelo Patient automáticamente
+     * Inicializa el componente.
+     * 
+     * @param Patient $patient El modelo del paciente inyectado automáticamente.
      */
     public function mount(Patient $patient): void
     {
@@ -42,6 +120,11 @@ class Create extends Component
         $this->consultation_date = now()->format('Y-m-d');
     }
 
+    /**
+     * Define las reglas de validación para las propiedades del formulario.
+     * 
+     * @return array<string, string> Reglas de validación.
+     */
     protected function rules(): array
     {
         return [
@@ -61,6 +144,14 @@ class Create extends Component
         ];
     }
 
+    /**
+     * Guarda el nuevo registro médico en la base de datos.
+     * 
+     * Realiza la validación, asignación de datos automáticos (usuario, paciente)
+     * y crea el registro. Redirige al perfil del paciente tras el éxito.
+     * 
+     * @return mixed Redirección a la ruta del paciente.
+     */
     public function save()
     {
         $this->authorize('create', MedicalRecord::class);
@@ -79,6 +170,11 @@ class Create extends Component
         return $this->redirect(route('patients.show', $this->patient), navigate: true);
     }
 
+    /**
+     * Renderiza la vista del componente.
+     * 
+     * @return View La vista de Livewire.
+     */
     public function render(): View
     {
         return view('livewire.medical-records.create', [
