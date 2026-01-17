@@ -7,53 +7,291 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
-## About Laravel
+## 📋 Descripción
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+MediFlow es una aplicación web SaaS desarrollada con Laravel 11 y PHP 8.3+ que permite a profesionales de la salud independientes gestionar sus consultorios de forma eficiente y segura.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## ✨ Características Principales
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Gestión de Pacientes
+- CRUD completo de pacientes
+- Búsqueda avanzada
+- Historial clínico digital
+- Datos encriptados para privacidad
 
-## Learning Laravel
+### Expedientes Clínicos
+- Registros médicos con encriptación automática
+- Múltiples tipos de registros (consulta, diagnóstico, procedimiento)
+- Signos vitales y métricas
+- Generación de recetas en PDF
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+### Sistema de Citas
+- Agenda inteligente con prevención de conflictos
+- Validación de horarios de atención
+- Estados de citas (pendiente, confirmada, completada, cancelada)
+- Notificaciones automáticas por email
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Multi-tenancy
+- Aislamiento completo de datos por clínica
+- Filtrado automático a nivel de base de datos
+- Seguridad reforzada con Policies
 
-## Laravel Sponsors
+### Seguridad y Auditoría
+- Encriptación de datos médicos sensibles
+- Registro de auditoría de todas las acciones
+- Control de acceso basado en roles (Admin/Asistente)
+- Prevención de race conditions con locks pesimistas
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Notificaciones
+- Confirmación de citas por email
+- Recordatorios automáticos 24h antes
+- Sistema de colas para procesamiento asíncrono
 
-### Premium Partners
+## 🛠️ Stack Tecnológico
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+- **Backend**: PHP 8.3+, Laravel 11
+- **Frontend**: Laravel Livewire 3, Tailwind CSS
+- **Base de Datos**: PostgreSQL
+- **Queue**: Database driver
+- **PDF**: DomPDF
+- **Testing**: Pest PHP
+- **Quality**: PHPStan (nivel 6), Laravel Pint
 
-## Contributing
+## 📦 Instalación
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### Requisitos Previos
 
-## Code of Conduct
+- Docker y Docker Compose
+- Git
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Pasos de Instalación
 
-## Security Vulnerabilities
+```bash
+# Clonar el repositorio
+git clone https://github.com/tu-usuario/mediflow.git
+cd mediflow
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+# Copiar el archivo de configuración
+cp .env.example .env
 
-## License
+# Instalar dependencias con Sail
+./vendor/bin/sail up -d
+./vendor/bin/sail composer install
+./vendor/bin/sail npm install
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+# Generar key de aplicación
+./vendor/bin/sail artisan key:generate
+
+# Ejecutar migraciones y seeders
+./vendor/bin/sail artisan migrate --seed
+
+# Compilar assets
+./vendor/bin/sail npm run dev
+```
+
+### Iniciar Queue Worker
+
+En una terminal separada:
+
+```bash
+./vendor/bin/sail artisan queue:work
+```
+
+### Iniciar Scheduler (opcional, para recordatorios)
+
+```bash
+./vendor/bin/sail artisan schedule:work
+```
+
+## 👤 Acceso al Sistema
+
+Después de ejecutar los seeders, puedes acceder con:
+
+- **Email**: admin@drperez.com
+- **Password**: password
+- **Rol**: Administrador
+
+O:
+
+- **Email**: maria@drperez.com
+- **Password**: password
+- **Rol**: Asistente
+
+## 🧪 Testing
+
+```bash
+# Ejecutar todos los tests
+./vendor/bin/sail pest
+
+# Con coverage
+./vendor/bin/sail pest --coverage
+
+# Tests específicos
+./vendor/bin/sail pest tests/Feature/AppointmentTest.php
+```
+
+## 📊 Análisis Estático
+
+```bash
+# PHPStan
+./vendor/bin/sail vendor/bin/phpstan analyse
+
+# Laravel Pint (formateo)
+./vendor/bin/sail vendor/bin/pint
+```
+
+## 📧 Testing de Emails
+
+Los emails se pueden ver en Mailpit:
+- URL: http://localhost:8025
+
+Enviar email de prueba:
+
+```bash
+./vendor/bin/sail artisan email:test confirmation
+./vendor/bin/sail artisan email:test reminder
+```
+
+## 🏗️ Arquitectura
+
+### Patrones Implementados
+
+- **Actions**: Lógica de negocio encapsulada
+- **DTOs**: Transferencia de datos tipados
+- **Policies**: Autorización granular
+- **Events/Listeners**: Desacoplamiento de lógica
+- **Jobs**: Procesamiento asíncrono
+- **Traits**: Reutilización de comportamiento (MultiTenant, Auditable)
+
+### Capas de la Aplicación
+
+```
+┌─────────────────────────────────────┐
+│         Presentation Layer          │
+│    (Livewire Components + Views)    │
+├─────────────────────────────────────┤
+│         Application Layer           │
+│    (Controllers, Actions, DTOs)     │
+├─────────────────────────────────────┤
+│          Domain Layer               │
+│  (Models, Enums, Business Logic)    │
+├─────────────────────────────────────┤
+│      Infrastructure Layer           │
+│ (Database, Queue, Mail, Storage)    │
+└─────────────────────────────────────┘
+```
+
+## 🔐 Seguridad
+
+### Datos Encriptados
+
+Los siguientes campos se encriptan automáticamente:
+- Síntomas
+- Diagnósticos
+- Plan de tratamiento
+- Prescripciones
+- Notas clínicas
+
+### Auditoría
+
+Todas las acciones se registran en `audit_logs`:
+- Creación, actualización, eliminación
+- Visualizaciones de expedientes médicos
+- IP, user agent, timestamp
+
+## 🚀 Deployment (Producción)
+
+### Checklist Pre-Deploy
+
+- [ ] Configurar `APP_ENV=production`
+- [ ] Configurar `APP_DEBUG=false`
+- [ ] Generar nueva `APP_KEY`
+- [ ] Configurar base de datos de producción
+- [ ] Configurar email (SES, Mailgun, etc.)
+- [ ] Configurar queue worker (Supervisor)
+- [ ] Configurar scheduler (cron)
+- [ ] Configurar SSL/HTTPS
+- [ ] Optimizar autoload: `composer install --optimize-autoloader --no-dev`
+- [ ] Cachear configuración: `php artisan config:cache`
+- [ ] Cachear rutas: `php artisan route:cache`
+- [ ] Cachear vistas: `php artisan view:cache`
+
+### Supervisor (Queue Worker)
+
+```ini
+[program:mediflow-worker]
+process_name=%(program_name)s_%(process_num)02d
+command=php /path/to/mediflow/artisan queue:work --sleep=3 --tries=3 --max-time=3600
+autostart=true
+autorestart=true
+stopasgroup=true
+killasgroup=true
+user=www-data
+numprocs=2
+redirect_stderr=true
+stdout_logfile=/path/to/mediflow/storage/logs/worker.log
+stopwaitsecs=3600
+```
+
+### Cron (Scheduler)
+
+```bash
+* * * * * cd /path/to/mediflow && php artisan schedule:run >> /dev/null 2>&1
+```
+
+## 📝 Licencia
+
+Este proyecto es de código abierto bajo licencia MIT.
+
+## 👨‍💻 Autor
+
+Desarrollado como proyecto educativo para demostrar buenas prácticas en Laravel.
+
+## 🤝 Contribuciones
+
+Las contribuciones son bienvenidas. Por favor, abre un issue primero para discutir cambios mayores.
+
+## 📞 Soporte
+
+Para reportar bugs o solicitar features, abre un issue en GitHub.
+
+Solucion layout
+
+php artisan livewire:publish --config
+
+/*
+|---------------------------------------------------------------------------
+| Layout View
+|---------------------------------------------------------------------------
+|
+| This property specifies the default layout view that will be used
+| when rendering a full-page component.
+|
+*/
+
+// Cambia esto:
+// 'layout' => 'components.layouts.app',
+
+// Por esto:
+'layout' => 'layouts.app',
+
+php artisan config:clear
+
+
+Para ejecutar scheduler en desarrollo:
+
+```bash
+./vendor/bin/sail artisan schedule:work
+```
+
+Para iniciar queue worker:
+
+```bash
+./vendor/bin/sail artisan queue:work
+```
+
+o para desarrollo:
+
+```bash
+./vendor/bin/sail artisan queue:listen
+```
