@@ -141,6 +141,42 @@ class DatabaseSeeder extends Seeder
             'city' => 'Bogotá',
         ]);
 
+        // Crear horarios de atención para Clínica 1 (Lunes a Viernes, 8AM-5PM)
+        for ($day = 1; $day <= 5; $day++) {
+            \App\Models\WorkingHours::create([
+                'clinic_id' => $clinic1->id,
+                'day_of_week' => $day,
+                'start_time' => '08:00',
+                'end_time' => '17:00',
+                'is_active' => true,
+            ]);
+        }
+
+        // Crear citas de ejemplo
+        \App\Models\Appointment::create([
+            'clinic_id' => $clinic1->id,
+            'patient_id' => $patient1->id,
+            'user_id' => 1, // Dr. Pérez
+            'scheduled_at' => now()->addDays(1)->setTime(10, 0),
+            'duration_minutes' => 30,
+            'status' => 'confirmed',
+            'appointment_type' => 'consultation',
+            'reason' => 'Control general',
+            'created_by' => 1,
+        ]);
+
+        \App\Models\Appointment::create([
+            'clinic_id' => $clinic1->id,
+            'patient_id' => $patient2->id,
+            'user_id' => 1,
+            'scheduled_at' => now()->addDays(1)->setTime(11, 0),
+            'duration_minutes' => 30,
+            'status' => 'pending',
+            'appointment_type' => 'follow_up',
+            'reason' => 'Control de tratamiento',
+            'created_by' => 2, // María
+        ]);
+
         $this->command->info('✅ Seeders ejecutados correctamente (o datos ya existían)');
     }
 }
