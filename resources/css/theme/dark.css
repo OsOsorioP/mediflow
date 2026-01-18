@@ -1,0 +1,9 @@
+[data-theme="dark"],
+.dark {
+  --color-primary: oklch(77.7% 0.152 181.912);
+  --neutro: oklch(78.237% 0.14168 180.323 / 0.132);
+
+  --text: var(--color-zinc-100);
+
+  --background: #0d0d0d;
+}

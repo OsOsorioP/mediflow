@@ -1,0 +1,7 @@
+[data-theme="light"] {
+  --color-primary: oklch(70.4% 0.14 182.503);
+
+  --text: var(--color-zinc-800);
+
+  --background: #f2f2f2;
+}
