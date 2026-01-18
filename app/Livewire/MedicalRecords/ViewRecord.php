@@ -16,6 +16,8 @@ class ViewRecord extends Component
     use AuthorizesRequests;
 
     public MedicalRecord $record;
+    public string $emailRecipient = '';
+    public bool $showEmailForm = false;
 
     /**
      * Mount
@@ -27,8 +29,38 @@ class ViewRecord extends Component
 
         $this->authorize('view', $this->record);
 
+        $this->emailRecipient = $this->record->patient->email ?? '';
+
         // Auditar visualización
         $this->record->auditView();
+    }
+
+    /**
+     * Toggle formulario de email
+     */
+    public function toggleEmailForm(): void
+    {
+        $this->showEmailForm = !$this->showEmailForm;
+    }
+
+    /**
+     * Enviar PDF por email
+     */
+    public function sendPdfByEmail(): void
+    {
+        $this->validate([
+            'emailRecipient' => 'required|email',
+        ], [
+            'emailRecipient.required' => 'El email es obligatorio',
+            'emailRecipient.email' => 'Debe ser un email válido',
+        ]);
+
+        // Despachar job
+        \App\Jobs\SendMedicalRecordPdf::dispatch($this->record, $this->emailRecipient);
+
+        session()->flash('message', 'El PDF se enviará por email a ' . $this->emailRecipient);
+        
+        $this->showEmailForm = false;
     }
 
     /**
