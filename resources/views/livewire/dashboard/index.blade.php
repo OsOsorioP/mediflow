@@ -1,4 +1,4 @@
-<div>
+<div class="w-max">
     {{-- Header con selector de período --}}
     <div class="mb-6">
         <div class="flex justify-between items-center mb-4">
