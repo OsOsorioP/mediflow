@@ -128,4 +128,22 @@ class Patient extends Model
     {
         return $this->hasMany(Appointment::class);
     }
+
+    /**
+     * Relación: Un paciente tiene muchos pagos
+     */
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+    /**
+     * Obtener balance total pagado
+     */
+    public function getTotalPaidAttribute(): float
+    {
+        return (float) $this->payments()
+            ->where('status', \App\Enums\PaymentStatus::COMPLETED)
+            ->sum('amount');
+    }
 }

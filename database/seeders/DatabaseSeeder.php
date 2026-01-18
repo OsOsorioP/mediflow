@@ -177,6 +177,32 @@ class DatabaseSeeder extends Seeder
             'created_by' => 2, // María
         ]);
 
+        // Crear pagos de ejemplo
+        \App\Models\Payment::create([
+            'clinic_id' => $clinic1->id,
+            'patient_id' => $patient1->id,
+            'appointment_id' => 1, // Primera cita
+            'amount' => 50.00,
+            'currency' => 'USD',
+            'payment_method' => 'cash',
+            'status' => 'completed',
+            'concept' => 'Consulta General',
+            'payment_date' => now()->subDays(5),
+            'created_by' => 1,
+        ]);
+
+        \App\Models\Payment::create([
+            'clinic_id' => $clinic1->id,
+            'patient_id' => $patient2->id,
+            'amount' => 35.00,
+            'currency' => 'USD',
+            'payment_method' => 'card',
+            'status' => 'completed',
+            'concept' => 'Control',
+            'payment_date' => today(),
+            'created_by' => 2,
+        ]);
+
         $this->command->info('✅ Seeders ejecutados correctamente (o datos ya existían)');
     }
 }

@@ -4,8 +4,12 @@ use App\Livewire\Appointments\Index as AppointmentsIndex;
 use App\Livewire\Patients\Index as PatientsIndex;
 use App\Livewire\Patients\Show as PatientsShow;
 use App\Livewire\Dashboard\Index as DashboardIndex;
+use App\Livewire\Payments\Index as PaymentsIndex;
+use App\Livewire\Payments\Create as PaymentsCreate;
+use App\Actions\Reports\GenerateReceiptPdfAction;
 use App\Actions\Reports\GeneratePrescriptionPdfAction;
 use App\Models\MedicalRecord;
+use App\Models\Payment;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Gate;
 
@@ -49,6 +53,20 @@ Route::middleware(['auth', 'tenant', 'verified'])->group(function () {
         $action = new GeneratePrescriptionPdfAction();
         return $action->stream($record);
     })->name('medical-records.prescription.stream');
+
+    // Rutas de pagos
+    Route::get('/payments', PaymentsIndex::class)->name('payments.index');
+
+    // Registrar pago
+    Route::get('/payments/create', PaymentsCreate::class)->name('payments.create');
+    
+    // Descargar recibo PDF
+    Route::get('/payments/{payment}/receipt/download', function (Payment $payment) {
+        Gate::authorize('view', $payment);
+        
+        $action = new GenerateReceiptPdfAction();
+        return $action->download($payment);
+    })->name('payments.receipt.download');
 });
 
 require __DIR__.'/auth.php';

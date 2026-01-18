@@ -6,12 +6,14 @@ namespace App\Models;
 
 use App\Enums\AppointmentStatus;
 use App\Enums\AppointmentType;
+use App\Enums\PaymentStatus;
 use App\Traits\Auditable;
 use App\Traits\MultiTenant;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Appointment extends Model
@@ -200,7 +202,7 @@ class Appointment extends Model
             return false;
         }
 
-        $result = $this->update(['status' => AppointmentStatus::CONFIRMED]);
+        $result = (bool) $this->update(['status' => AppointmentStatus::CONFIRMED]);
 
         if ($result) {
             event(new \App\Events\AppointmentConfirmed($this));
@@ -218,19 +220,19 @@ class Appointment extends Model
             return false;
         }
 
-        return $this->update(['status' => AppointmentStatus::COMPLETED]);
+        return (bool) $this->update(['status' => AppointmentStatus::COMPLETED]);
     }
 
     /**
      * Cancelar la cita
      */
-    public function cancel(string $reason = null): bool
+    public function cancel(string|null $reason = null): bool
     {
         if (!$this->canBeCancelled()) {
             return false;
         }
 
-        return $this->update([
+        return (bool) $this->update([
             'status' => AppointmentStatus::CANCELLED,
             'cancellation_reason' => $reason,
         ]);
@@ -245,6 +247,22 @@ class Appointment extends Model
             return false;
         }
 
-        return $this->update(['status' => AppointmentStatus::NO_SHOW]);
+        return (bool) $this->update(['status' => AppointmentStatus::NO_SHOW]);
+    }
+
+    /**
+     * Relación: Una cita puede tener un pago
+     */
+    public function payment(): HasOne
+    {
+        return $this->hasOne(Payment::class);
+    }
+
+    /**
+     * Verificar si la cita está pagada
+     */
+    public function isPaid(): bool
+    {
+        return $this->payment()->where('status', PaymentStatus::COMPLETED)->exists();
     }
 }
