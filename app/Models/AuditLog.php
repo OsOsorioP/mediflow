@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class AuditLog extends Model
 {
-    // No usar timestamps automáticos, solo created_at
     public $timestamps = false;
 
     protected $fillable = [
@@ -33,68 +32,43 @@ class AuditLog extends Model
         'created_at' => 'datetime',
     ];
 
-    /**
-     * Boot del modelo
-     */
     protected static function booted(): void
     {
-        // Establecer created_at automáticamente
         static::creating(function (AuditLog $log) {
             $log->created_at = now();
         });
     }
 
-    /**
-     * Relación polimórfica: El modelo auditado
-     */
     public function auditable(): MorphTo
     {
         return $this->morphTo();
     }
 
-    /**
-     * Relación: Usuario que realizó la acción
-     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * Relación: Clínica
-     */
     public function clinic(): BelongsTo
     {
         return $this->belongsTo(Clinic::class);
     }
 
-    /**
-     * Scope: Filtrar por tipo de modelo auditado
-     */
     public function scopeForModel($query, string $modelClass)
     {
         return $query->where('auditable_type', $modelClass);
     }
 
-    /**
-     * Scope: Filtrar por acción específica
-     */
     public function scopeAction($query, string $action)
     {
         return $query->where('action', $action);
     }
 
-    /**
-     * Scope: Logs recientes primero
-     */
     public function scopeRecent($query)
     {
         return $query->orderBy('created_at', 'desc');
     }
 
-    /**
-     * Accessor: Descripción legible de la acción
-     */
     public function getActionDescriptionAttribute(): string
     {
         $modelName = class_basename($this->auditable_type);
@@ -110,9 +84,6 @@ class AuditLog extends Model
         };
     }
 
-    /**
-     * Obtiene los cambios realizados (para action = updated)
-     */
     public function getChangesAttribute(): array
     {
         if ($this->action !== 'updated' || !$this->new_values) {

@@ -13,9 +13,6 @@ enum MedicalRecordType: string
     case EVOLUTION_NOTE = 'evolution_note';
     case PROCEDURE = 'procedure';
 
-    /**
-     * Label legible para humanos
-     */
     public function label(): string
     {
         return match($this) {
@@ -28,9 +25,6 @@ enum MedicalRecordType: string
         };
     }
 
-    /**
-     * Icono para UI (usando clases de Heroicons o similar)
-     */
     public function icon(): string
     {
         return match($this) {
@@ -43,9 +37,6 @@ enum MedicalRecordType: string
         };
     }
 
-    /**
-     * Color para badges en UI
-     */
     public function color(): string
     {
         return match($this) {
@@ -58,17 +49,11 @@ enum MedicalRecordType: string
         };
     }
 
-    /**
-     * Obtiene todos los valores como array
-     */
     public static function values(): array
     {
         return array_column(self::cases(), 'value');
     }
 
-    /**
-     * Para usar en selects de formularios
-     */
     public static function options(): array
     {
         $options = [];

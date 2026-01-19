@@ -11,9 +11,6 @@ enum PaymentStatus: string
     case CANCELLED = 'cancelled';
     case REFUNDED = 'refunded';
 
-    /**
-     * Label legible
-     */
     public function label(): string
     {
         return match($this) {
@@ -24,9 +21,6 @@ enum PaymentStatus: string
         };
     }
 
-    /**
-     * Color
-     */
     public function color(): string
     {
         return match($this) {
@@ -37,9 +31,6 @@ enum PaymentStatus: string
         };
     }
 
-    /**
-     * Opciones para select
-     */
     public static function options(): array
     {
         $options = [];

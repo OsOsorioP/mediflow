@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace App\Enums;
 
-/**
- * Define los estados posibles de una cita médica.
- */
 enum AppointmentStatus: string
 {
     case PENDING = 'pending';
@@ -15,9 +12,6 @@ enum AppointmentStatus: string
     case CANCELLED = 'cancelled';
     case NO_SHOW = 'no_show';
 
-    /**
-     * Label legible
-     */
     public function label(): string
     {
         return match($this) {
@@ -29,9 +23,6 @@ enum AppointmentStatus: string
         };
     }
 
-    /**
-     * Color para badges en UI
-     */
     public function color(): string
     {
         return match($this) {
@@ -43,9 +34,6 @@ enum AppointmentStatus: string
         };
     }
 
-    /**
-     * Icono
-     */
     public function icon(): string
     {
         return match($this) {
@@ -57,33 +45,21 @@ enum AppointmentStatus: string
         };
     }
 
-    /**
-     * Verifica si la cita está activa (no cancelada ni completada)
-     */
     public function isActive(): bool
     {
         return $this === self::PENDING || $this === self::CONFIRMED;
     }
 
-    /**
-     * Verifica si se puede modificar la cita
-     */
     public function canBeModified(): bool
     {
         return $this === self::PENDING || $this === self::CONFIRMED;
     }
 
-    /**
-     * Verifica si se puede cancelar
-     */
     public function canBeCancelled(): bool
     {
         return $this === self::PENDING || $this === self::CONFIRMED;
     }
 
-    /**
-     * Valores para selects
-     */
     public static function options(): array
     {
         $options = [];
@@ -93,9 +69,6 @@ enum AppointmentStatus: string
         return $options;
     }
 
-    /**
-     * Solo estados activos
-     */
     public static function activeStatuses(): array
     {
         return [self::PENDING->value, self::CONFIRMED->value];

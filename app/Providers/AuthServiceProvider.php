@@ -18,11 +18,6 @@ use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvid
 
 class AuthServiceProvider extends ServiceProvider
 {
-    /**
-     * The model to policy mappings for the application.
-     *
-     * @var array<class-string, class-string>
-     */
     protected $policies = [
         User::class => UserPolicy::class,
         Patient::class => PatientPolicy::class,
@@ -31,9 +26,6 @@ class AuthServiceProvider extends ServiceProvider
         Payment::class => PaymentPolicy::class,
     ];
 
-    /**
-     * Register any authentication / authorization services.
-     */
     public function boot(): void
     {
         //

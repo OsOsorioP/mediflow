@@ -13,15 +13,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 trait MultiTenant
 {
-    /**
-     * Boot del trait. Laravel lo llama automáticamente.
-     */
     protected static function bootMultiTenant(): void
     {
-        // Aplicamos el Scope que creamos en el Paso 3
         static::addGlobalScope(new ClinicScope());
 
-        // Al crear un registro, asignamos automáticamente el clinic_id
         static::creating(function (Model $model) {
             $manager = app(TenantManager::class);
 
@@ -40,9 +35,6 @@ trait MultiTenant
         return $this->belongsTo(Clinic::class);
     }
 
-    /**
-     * Scope para ignorar el filtro (útil para reportes admin)
-     */
     public function scopeAllClinics(Builder $query): Builder
     {
         return $query->withoutGlobalScope(ClinicScope::class);

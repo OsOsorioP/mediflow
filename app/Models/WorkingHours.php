@@ -29,41 +29,26 @@ class WorkingHours extends Model
         'is_active' => 'boolean',
     ];
 
-    /**
-     * Relación con clínica
-     */
     public function clinic(): BelongsTo
     {
         return $this->belongsTo(Clinic::class);
     }
 
-    /**
-     * Scope: Solo horarios activos
-     */
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
     }
 
-    /**
-     * Scope: Por día de la semana
-     */
     public function scopeForDay($query, int $dayOfWeek)
     {
         return $query->where('day_of_week', $dayOfWeek);
     }
 
-    /**
-     * Obtiene el nombre del día
-     */
     public function getDayNameAttribute(): string
     {
         return Carbon::parse("Sunday + {$this->day_of_week} days")->locale('es')->dayName;
     }
 
-    /**
-     * Verifica si una hora específica está dentro del horario
-     */
     public function includesTime(Carbon $time): bool
     {
         $checkTime = $time->format('H:i');
@@ -73,10 +58,6 @@ class WorkingHours extends Model
         return $checkTime >= $start && $checkTime < $end;
     }
 
-    /**
-     * Obtiene todos los slots disponibles para este horario
-     * @param int $slotDuration Duración de cada slot en minutos
-     */
     public function getAvailableSlots(int $slotDuration = 30): array
     {
         $slots = [];
@@ -91,9 +72,6 @@ class WorkingHours extends Model
         return $slots;
     }
 
-    /**
-     * Nombres de días para helpers
-     */
     public static function dayNames(): array
     {
         return [

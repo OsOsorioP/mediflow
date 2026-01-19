@@ -13,9 +13,6 @@ enum PaymentMethod: string
     case CHECK = 'check';
     case OTHER = 'other';
 
-    /**
-     * Label legible
-     */
     public function label(): string
     {
         return match($this) {
@@ -28,9 +25,6 @@ enum PaymentMethod: string
         };
     }
 
-    /**
-     * Icono
-     */
     public function icon(): string
     {
         return match($this) {
@@ -43,9 +37,6 @@ enum PaymentMethod: string
         };
     }
 
-    /**
-     * Color
-     */
     public function color(): string
     {
         return match($this) {
@@ -58,9 +49,6 @@ enum PaymentMethod: string
         };
     }
 
-    /**
-     * Opciones para select
-     */
     public static function options(): array
     {
         $options = [];

@@ -11,9 +11,6 @@ enum AppointmentType: string
     case PROCEDURE = 'procedure';
     case EMERGENCY = 'emergency';
 
-    /**
-     * Label legible
-     */
     public function label(): string
     {
         return match($this) {
@@ -24,9 +21,6 @@ enum AppointmentType: string
         };
     }
 
-    /**
-     * Duración por defecto en minutos
-     */
     public function defaultDuration(): int
     {
         return match($this) {
@@ -37,9 +31,6 @@ enum AppointmentType: string
         };
     }
 
-    /**
-     * Color
-     */
     public function color(): string
     {
         return match($this) {
@@ -50,9 +41,6 @@ enum AppointmentType: string
         };
     }
 
-    /**
-     * Opciones para select
-     */
     public static function options(): array
     {
         $options = [];

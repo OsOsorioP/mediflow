@@ -13,9 +13,6 @@ class Clinic extends Model
 {
     use HasFactory, SoftDeletes;
 
-    /**
-     * Atributos que se pueden asignar masivamente
-     */
     protected $fillable = [
         'name',
         'slug',
@@ -28,69 +25,43 @@ class Clinic extends Model
         'max_patients',
     ];
 
-    /**
-     * Atributos que deben ser casteados a tipos nativos
-     */
     protected $casts = [
         'is_active' => 'boolean',
-        'settings' => 'array', // JSON se convierte automáticamente a array
+        'settings' => 'array', 
         'max_users' => 'integer',
         'max_patients' => 'integer',
     ];
 
-    /**
-     * Relación: Una clínica tiene muchos usuarios
-     */
     public function users(): HasMany
     {
         return $this->hasMany(User::class);
     }
 
-    /**
-     * Scope: Filtrar solo clínicas activas
-     * Uso: Clinic::active()->get()
-     */
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
     }
 
-    /**
-     * Verifica si la clínica puede agregar más usuarios
-     */
     public function canAddUser(): bool
     {
         return $this->users()->count() < $this->max_users;
     }
 
-    /**
-     * Verifica si la clínica puede agregar más pacientes
-     */
     public function canAddPatient(): bool
     {
         return $this->patients()->count() < $this->max_patients;
     }
 
-    /**
-     * Relación: Una clínica tiene muchos pacientes
-     */
     public function patients(): HasMany
     {
         return $this->hasMany(Patient::class);
     }
 
-    /**
-     * Accessor: Obtiene una configuración específica del JSON
-     * Uso: $clinic->getSetting('timezone', 'America/Bogota')
-     */
     public function getSetting(string $key, mixed $default = null): mixed
     {
         return data_get($this->settings, $key, $default);
     }
 
-    /**
-     * Establece una configuración específica
-     */
     public function setSetting(string $key, mixed $value): void
     {
         $settings = $this->settings ?? [];
@@ -99,17 +70,11 @@ class Clinic extends Model
         $this->save();
     }
 
-    /**
-     * Relación: Una clínica tiene muchos horarios de atención
-     */
     public function workingHours(): HasMany
     {
         return $this->hasMany(WorkingHours::class);
     }
 
-    /**
-     * Relación: Una clínica tiene muchas citas
-     */
     public function appointments(): HasMany
     {
         return $this->hasMany(Appointment::class);

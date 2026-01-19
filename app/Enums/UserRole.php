@@ -9,9 +9,6 @@ enum UserRole: string
     case ADMIN = 'admin';
     case ASSISTANT = 'assistant';
 
-    /**
-     * Obtiene un label legible para humanos
-     */
     public function label(): string
     {
         return match($this) {
@@ -20,25 +17,16 @@ enum UserRole: string
         };
     }
 
-    /**
-     * Verifica si el rol tiene privilegios administrativos
-     */
     public function isAdmin(): bool
     {
         return $this === self::ADMIN;
     }
 
-    /**
-     * Obtiene todos los valores posibles como array
-     */
     public static function values(): array
     {
         return array_column(self::cases(), 'value');
     }
 
-    /**
-     * Obtiene un array para usar en selects de formularios
-     */
     public static function options(): array
     {
         $options = [];
