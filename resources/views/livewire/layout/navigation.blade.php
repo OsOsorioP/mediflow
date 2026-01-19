@@ -16,7 +16,7 @@ new class extends Component
     }
 }; ?>
 
-<nav x-data="{ open: false }" class="bg-white border-b border-gray-100 w-full h-full items-center justify-center">
+<nav x-data="{ open: false }" class="bg-white border-r border-gray-300 w-full h-full items-center justify-center">
     <!-- Primary Navigation Menu -->
     <div class="flex flex-col py-4 justify-center">
         <div class="flex flex-col h-full items-center justify-center">
@@ -34,13 +34,13 @@ new class extends Component
                         {{ __('Dashboard') }}
                     </x-nav-link>
                     <x-nav-link :href="route('patients.index')" :active="request()->routeIs('patients.index')" wire:navigate>
-                        {{ __('Patients') }}
+                        {{ __('Pacientes') }}
                     </x-nav-link>
                     <x-nav-link :href="route('appointments.index')" :active="request()->routeIs('appointments.index')" wire:navigate>
-                        {{ __('Appointments') }}
+                        {{ __('Citas') }}
                     </x-nav-link>
                     <x-nav-link :href="route('payments.index')" :active="request()->routeIs('payments.index')" wire:navigate>
-                        {{ __('Payments') }}
+                        {{ __('Pagos') }}
                     </x-nav-link>
                 </div>
             </div>
@@ -64,13 +64,13 @@ new class extends Component
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('patients.index')" :active="request()->routeIs('patients.index')" wire:navigate>
-                {{ __('Patients') }}
+                {{ __('Pacientes') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('appointments.index')" :active="request()->routeIs('appointments.index')" wire:navigate>
-                {{ __('Appointments') }}
+                {{ __('Citas') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('payments.index')" :active="request()->routeIs('payments.index')" wire:navigate>
-                {{ __('Payments') }}
+                {{ __('Pagos') }}
             </x-responsive-nav-link>
         </div>
     </div>

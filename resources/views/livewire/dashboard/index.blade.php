@@ -1,6 +1,6 @@
-<div class="w-max">
+<div class="flex flex-col min-w-full gap-6">
     {{-- Header con selector de período --}}
-    <div class="mb-6">
+    <div class="">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-2xl font-bold text-gray-900">Dashboard</h2>
             
@@ -24,7 +24,7 @@
         </div>
 
         {{-- KPIs Grid --}}
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {{-- Total Pacientes --}}
             <div class="bg-white rounded-lg shadow p-6">
                 <div class="flex items-center justify-between">
@@ -92,7 +92,7 @@
     </div>
 
     {{-- Grids principales --}}
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {{-- Citas de Hoy --}}
         <div class="lg:col-span-2 bg-white rounded-lg shadow">
             <div class="p-6 border-b border-gray-200">

@@ -16,27 +16,18 @@ use Livewire\Component;
 #[Layout('layouts.app')]
 class Index extends Component
 {
-    public string $period = 'month'; // week, month, year
+    public string $period = 'month';
 
-    /**
-     * Cambiar período
-     */
     public function setPeriod(string $period): void
     {
         $this->period = $period;
     }
 
-    /**
-     * Renderizar
-     */
     public function render(): View
     {
 
-
-        // Obtener rangos de fechas según período
         [$startDate, $endDate] = $this->getDateRange();
 
-        // KPIs principales
         $stats = [
             'total_patients' => Patient::active()->count(),
             
@@ -58,13 +49,11 @@ class Index extends Component
                 ->count(),
         ];
 
-        // Citas de hoy
         $todayAppointments = Appointment::with(['patient', 'doctor'])
             ->whereDate('scheduled_at', today())
             ->orderBy('scheduled_at')
             ->get();
 
-        // Próximas citas (7 días)
         $upcomingAppointments = Appointment::with(['patient', 'doctor'])
             ->whereBetween('scheduled_at', [now(), now()->addDays(7)])
             ->whereIn('status', AppointmentStatus::activeStatuses())
@@ -72,18 +61,15 @@ class Index extends Component
             ->limit(10)
             ->get();
 
-        // Distribución de citas por estado (para gráfica)
         $appointmentsByStatus = Appointment::whereBetween('scheduled_at', [$startDate, $endDate])
             ->selectRaw('status, COUNT(*) as count')
             ->groupBy('status')
             ->get()
             ->mapWithKeys(function ($item) {
-                // Manejo seguro de Enum
                 $label = method_exists($item->status, 'label') ? $item->status->label() : $item->status->value;
                 return [$label => $item->count];
             });
 
-        // Pacientes más frecuentes
         $topPatients = Patient::query()
             ->withCount(['appointments' => function ($query) use ($startDate, $endDate) {
                 $query->whereBetween('scheduled_at', [$startDate, $endDate]);
@@ -104,9 +90,6 @@ class Index extends Component
         ]);
     }
 
-    /**
-     * Obtener rango de fechas según el período
-     */
     protected function getDateRange(): array
     {
         $now = Carbon::now();
@@ -117,4 +100,5 @@ class Index extends Component
             default => [$now->copy()->startOfMonth(), $now->copy()->endOfMonth()],
         };
     }
+    
 }
