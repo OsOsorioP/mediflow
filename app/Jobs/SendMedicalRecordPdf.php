@@ -21,9 +21,6 @@ class SendMedicalRecordPdf implements ShouldQueue
     public int $tries = 3;
     public int $timeout = 120;
 
-    /**
-     * Create a new job instance.
-     */
     public function __construct(
         public MedicalRecord $record,
         public string $recipientEmail
@@ -31,18 +28,12 @@ class SendMedicalRecordPdf implements ShouldQueue
         //
     }
 
-    /**
-     * Execute the job.
-     */
     public function handle(): void
     {
         Mail::to($this->recipientEmail)
             ->send(new MedicalRecordPdf($this->record));
     }
 
-    /**
-     * Handle a job failure.
-     */
     public function failed(\Throwable $exception): void
     {
         Log::error('Error enviando PDF de registro médico', [

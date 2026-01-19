@@ -17,7 +17,6 @@ class Create extends Component
 {
     use AuthorizesRequests;
 
-    // Propiedades del formulario
     public string $first_name = '';
     public string $last_name = '';
     public string $identification_type = 'CC';
@@ -35,9 +34,6 @@ class Create extends Component
     public string $emergency_contact_relationship = '';
     public string $notes = '';
 
-    /**
-     * Reglas de validación
-     */
     protected function rules(): array
     {
         $clinicId = app(TenantManager::class)->getClinicId();
@@ -67,9 +63,6 @@ class Create extends Component
         ];
     }
 
-    /**
-     * Mensajes de validación personalizados
-     */
     protected function messages(): array
     {
         return [
@@ -84,17 +77,11 @@ class Create extends Component
         ];
     }
 
-    /**
-     * Validación en tiempo real
-     */
     public function updated($propertyName): void
     {
         $this->validateOnly($propertyName);
     }
 
-    /**
-     * Guardar paciente
-     */
     public function save(): void
     {
         $this->authorize('create', Patient::class);
@@ -103,20 +90,15 @@ class Create extends Component
 
         $patient = Patient::create($validated);
 
-        // Emitir evento para que el componente Index se actualice
         $this->dispatch('patientCreated');
         $this->dispatch('closeModal');
         $this->reset(); 
 
         session()->flash('message', 'Paciente creado correctamente');
         
-        // Redirigir a la vista del paciente
-        //$this->redirect(route('patients.show', $patient), navigate: true);
+        $this->redirect(route('patients.show', $patient), navigate: true);
     }
 
-    /**
-     * Renderizar componente
-     */
     public function render(): View
     {
         return view('livewire.patients.create');

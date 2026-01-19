@@ -41,49 +41,31 @@ class Patient extends Model
         'is_active' => 'boolean',
     ];
 
-    /**
-     * Relación: Un paciente tiene muchos registros médicos
-     */
     public function medicalRecords(): HasMany
     {
         return $this->hasMany(MedicalRecord::class);
     }
 
-    /**
-     * Accessor: Nombre completo del paciente
-     */
     public function getFullNameAttribute(): string
     {
         return "{$this->first_name} {$this->last_name}";
     }
 
-    /**
-     * Accessor: Edad calculada a partir de fecha de nacimiento
-     */
     public function getAgeAttribute(): int
     {
         return $this->date_of_birth->age;
     }
 
-    /**
-     * Accessor: Identificación completa (tipo + número)
-     */
     public function getFullIdentificationAttribute(): string
     {
         return "{$this->identification_type} {$this->identification_number}";
     }
 
-    /**
-     * Scope: Pacientes activos
-     */
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
     }
 
-    /**
-     * Scope: Buscar pacientes por nombre o documento
-     */
     public function scopeSearch($query, string $search)
     {
         return $query->where(function ($q) use ($search) {
@@ -95,17 +77,11 @@ class Patient extends Model
         });
     }
 
-    /**
-     * Scope: Filtrar por género
-     */
     public function scopeGender($query, string $gender)
     {
         return $query->where('gender', $gender);
     }
 
-    /**
-     * Obtiene el último registro médico
-     */
     public function getLatestMedicalRecord(): ?MedicalRecord
     {
         return $this->medicalRecords()
@@ -113,33 +89,21 @@ class Patient extends Model
             ->first();
     }
 
-    /**
-     * Cuenta total de consultas del paciente
-     */
     public function getTotalConsultationsAttribute(): int
     {
         return $this->medicalRecords()->count();
     }
 
-    /**
-     * Relación: Un paciente tiene muchas citas
-     */
     public function appointments(): HasMany
     {
         return $this->hasMany(Appointment::class);
     }
 
-    /**
-     * Relación: Un paciente tiene muchos pagos
-     */
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);
     }
 
-    /**
-     * Obtener balance total pagado
-     */
     public function getTotalPaidAttribute(): float
     {
         return (float) $this->payments()

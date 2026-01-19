@@ -12,13 +12,11 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\Layout;
 
+#[Layout('layouts.app')] 
 class Index extends Component
 {
     use WithPagination, AuthorizesRequests;
 
-    #[Layout('layouts.app')] 
-
-    // Propiedades públicas (son reactivas)
     public string $search = '';
     public string $filterGender = '';
     public bool $filterActive = true;
@@ -26,27 +24,20 @@ class Index extends Component
     public string $sortDirection = 'desc';
     public bool $showCreateModal = false;
 
-    // Listeners para eventos de otros componentes
     protected $listeners = ['patientCreated' => '$refresh', 'patientUpdated' => '$refresh'];
 
     #[On('closeModal')] 
     public function closeModal(): void
     {
         $this->showCreateModal = false;
-        $this->dispatch('patient-created'); // Opcional: notificación
+        $this->dispatch('patient-created');
     }
 
-    /**
-     * Resetear paginación cuando cambia la búsqueda
-     */
     public function updatedSearch(): void
     {
         $this->resetPage();
     }
 
-    /**
-     * Resetear paginación cuando cambian los filtros
-     */
     public function updatedFilterGender(): void
     {
         $this->resetPage();
@@ -57,9 +48,6 @@ class Index extends Component
         $this->resetPage();
     }
 
-    /**
-     * Ordenar por columna
-     */
     public function sortBy(string $field): void
     {
         if ($this->sortField === $field) {
@@ -70,9 +58,6 @@ class Index extends Component
         }
     }
 
-    /**
-     * Archivar/Desarchivar paciente
-     */
     public function toggleActive(int $patientId): void
     {
         $patient = Patient::findOrFail($patientId);
@@ -87,9 +72,6 @@ class Index extends Component
         session()->flash('message', $message);
     }
 
-    /**
-     * Eliminar paciente (soft delete)
-     */
     public function delete(int $patientId): void
     {
         $patient = Patient::findOrFail($patientId);
@@ -101,9 +83,6 @@ class Index extends Component
         session()->flash('message', 'Paciente eliminado correctamente');
     }
 
-    /**
-     * Renderizar el componente
-     */
     public function render(): View
     {
         $this->authorize('viewAny', Patient::class);

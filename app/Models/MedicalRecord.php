@@ -48,40 +48,25 @@ class MedicalRecord extends Model
         'attachments' => 'array',
     ];
 
-    /**
-     * Boot del modelo - Auditar visualizaciones
-     */
     protected static function booted(): void
     {
-        // Cada vez que se carga un MedicalRecord, registrarlo
         static::retrieved(function (MedicalRecord $record) {
-            // Solo auditar si es una petición HTTP real (no en consola/queue)
             if (app()->runningInConsole() === false && request()->isMethod('GET')) {
                 $record->auditView();
             }
         });
     }
 
-    /**
-     * Relación: Pertenece a un paciente
-     */
     public function patient(): BelongsTo
     {
         return $this->belongsTo(Patient::class);
     }
 
-    /**
-     * Relación: Creado por un usuario (médico/asistente)
-     */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    /**
-     * ENCRIPTACIÓN: Síntomas
-     * Laravel automáticamente encripta/desencripta usando Attribute
-     */
     protected function symptoms(): Attribute
     {
         return Attribute::make(
@@ -90,9 +75,6 @@ class MedicalRecord extends Model
         );
     }
 
-    /**
-     * ENCRIPTACIÓN: Diagnóstico
-     */
     protected function diagnosis(): Attribute
     {
         return Attribute::make(
@@ -101,9 +83,6 @@ class MedicalRecord extends Model
         );
     }
 
-    /**
-     * ENCRIPTACIÓN: Plan de tratamiento
-     */
     protected function treatmentPlan(): Attribute
     {
         return Attribute::make(
@@ -112,9 +91,6 @@ class MedicalRecord extends Model
         );
     }
 
-    /**
-     * ENCRIPTACIÓN: Prescripciones
-     */
     protected function prescriptions(): Attribute
     {
         return Attribute::make(
@@ -123,9 +99,6 @@ class MedicalRecord extends Model
         );
     }
 
-    /**
-     * ENCRIPTACIÓN: Notas clínicas
-     */
     protected function clinicalNotes(): Attribute
     {
         return Attribute::make(
@@ -134,25 +107,16 @@ class MedicalRecord extends Model
         );
     }
 
-    /**
-     * Scope: Filtrar por tipo de registro
-     */
     public function scopeType($query, MedicalRecordType $type)
     {
         return $query->where('record_type', $type);
     }
 
-    /**
-     * Scope: Registros recientes primero
-     */
     public function scopeRecent($query)
     {
         return $query->orderBy('consultation_date', 'desc');
     }
 
-    /**
-     * Accessor: IMC (Índice de Masa Corporal) calculado
-     */
     public function getBmiAttribute(): ?float
     {
         if (!$this->weight || !$this->height) {

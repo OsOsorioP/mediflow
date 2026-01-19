@@ -22,30 +22,25 @@ class Edit extends Component
     public string $identification_type = '';
     public string $identification_number = '';
     public string $date_of_birth = '';
-    public string $gender = '';
-    public string $blood_type = '';
-    public string $email = '';
+    public ?string $gender = '';
+    public ?string $blood_type = '';
+    public ?string $email = '';
     public string $phone = '';
-    public string $mobile_phone = '';
-    public string $address = '';
-    public string $city = '';
-    public string $emergency_contact_name = '';
-    public string $emergency_contact_phone = '';
-    public string $emergency_contact_relationship = '';
-    public string $notes = '';
+    public ?string $mobile_phone = '';
+    public ?string $address = '';
+    public ?string $city = '';
+    public ?string $emergency_contact_name = '';
+    public ?string $emergency_contact_phone = '';
+    public ?string $emergency_contact_relationship = '';
+    public ?string $notes = '';
 
-    /**
-     * Mount - Laravel inyecta el modelo Patient automáticamente por la URL
-     */
     public function mount(Patient $patient): void
     {
         $this->authorize('update', $patient);
         $this->patient = $patient;
 
-        // Llenar las propiedades con los datos del modelo
         $this->fill($patient->toArray());
-        
-        // Formatear fecha para el input date de HTML
+
         $this->date_of_birth = $patient->date_of_birth->format('Y-m-d');
     }
 
@@ -61,9 +56,8 @@ class Edit extends Component
                 'required',
                 'string',
                 'max:255',
-                // Único en la clínica, ignorando al paciente actual
                 Rule::unique('patients')
-                    ->where(fn ($q) => $q->where('clinic_id', $clinicId))
+                    ->where(fn($q) => $q->where('clinic_id', $clinicId))
                     ->ignore($this->patient->id),
             ],
             'date_of_birth' => 'required|date|before:today',
@@ -89,8 +83,7 @@ class Edit extends Component
         $this->patient->update($validated);
 
         session()->flash('message', 'Paciente actualizado correctamente');
-        
-        // Redirigir al listado o al perfil del paciente
+
         return $this->redirect(route('patients.show', $this->patient), navigate: true);
     }
 

@@ -18,49 +18,36 @@ class Show extends Component
     #[Layout('layouts.app')]
 
     public Patient $patient;
-    public string $activeTab = 'info'; // info, medical_records, audit
+    public string $activeTab = 'info';
 
-    // Listeners para refrescar cuando se crea/actualiza un registro médico
     protected $listeners = [
         'medicalRecordCreated' => '$refresh',
         'medicalRecordUpdated' => '$refresh',
     ];
 
-    /**
-     * Mount - Se ejecuta al inicializar el componente
-     */
     public function mount(Patient $patient): void
     {
         $this->authorize('view', $patient);
         
-        // Auditar que se visualizó el paciente
         $patient->auditView();
         
         $this->patient = $patient;
     }
 
-    /**
-     * Cambiar de pestaña
-     */
     public function setTab(string $tab): void
     {
         $this->activeTab = $tab;
         $this->resetPage();
     }
 
-    /**
-     * Renderizar componente
-     */
     public function render(): View
     {
-        // Cargar registros médicos con paginación
         $medicalRecords = $this->patient
             ->medicalRecords()
             ->with('creator')
             ->recent()
             ->paginate(10);
 
-        // Cargar logs de auditoría si está en esa pestaña
         $auditLogs = null;
         if ($this->activeTab === 'audit') {
             $auditLogs = $this->patient

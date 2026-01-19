@@ -18,18 +18,12 @@ class MedicalRecordPdf extends Mailable
 {
     use Queueable, SerializesModels;
 
-    /**
-     * Create a new message instance.
-     */
     public function __construct(
         public MedicalRecord $record
     ) {
         //
     }
 
-    /**
-     * Get the message envelope.
-     */
     public function envelope(): Envelope
     {
         return new Envelope(
@@ -41,9 +35,6 @@ class MedicalRecordPdf extends Mailable
         );
     }
 
-    /**
-     * Get the message content definition.
-     */
     public function content(): Content
     {
         return new Content(
@@ -56,14 +47,8 @@ class MedicalRecordPdf extends Mailable
         );
     }
 
-    /**
-     * Get the attachments for the message.
-     *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
-     */
     public function attachments(): array
     {
-        // Generar el PDF
         $pdf = Pdf::loadView('pdfs.prescription', [
             'record' => $this->record,
             'patient' => $this->record->patient,
