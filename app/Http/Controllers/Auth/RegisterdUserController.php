@@ -20,19 +20,12 @@ use Illuminate\View\View;
 
 class RegisteredUserController extends Controller
 {
-    /**
-     * Display the registration view.
-     */
+
     public function create(): View
     {
         return view('auth.register');
     }
 
-    /**
-     * Handle an incoming registration request.
-     *
-     * @throws \Illuminate\Validation\ValidationException
-     */
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
@@ -40,14 +33,11 @@ class RegisteredUserController extends Controller
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
 
-            // Nuevos campos para la clínica
             'clinic_name' => ['required', 'string', 'max:255'],
             'clinic_phone' => ['nullable', 'string', 'max:20'],
         ]);
 
-        // Usar transacción para garantizar atomicidad
         DB::transaction(function () use ($request) {
-            // 1. Crear la clínica
             $clinic = Clinic::create([
                 'name' => $request->clinic_name,
                 'slug' => Str::slug($request->clinic_name).'-'.Str::random(6),
@@ -55,13 +45,12 @@ class RegisteredUserController extends Controller
                 'is_active' => true,
             ]);
 
-            // 2. Crear el usuario como Admin de esa clínica
             $user = User::create([
                 'clinic_id' => $clinic->id,
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
-                'role' => UserRole::ADMIN, // Primer usuario siempre es admin
+                'role' => UserRole::ADMIN,
                 'is_active' => true,
             ]);
 
