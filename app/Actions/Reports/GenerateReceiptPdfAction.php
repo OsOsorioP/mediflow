@@ -9,9 +9,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class GenerateReceiptPdfAction
 {
-    /**
-     * Descargar recibo PDF
-     */
+
     public function download(Payment $payment): \Illuminate\Http\Response
     {
         $payment->load(['patient', 'creator', 'clinic', 'appointment']);
@@ -31,9 +29,6 @@ class GenerateReceiptPdfAction
         return $pdf->download($filename);
     }
 
-    /**
-     * Stream del PDF
-     */
     public function stream(Payment $payment): \Illuminate\Http\Response
     {
         $payment->load(['patient', 'creator', 'clinic', 'appointment']);

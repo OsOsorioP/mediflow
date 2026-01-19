@@ -18,31 +18,23 @@ class Index extends Component
 {
     use WithPagination, AuthorizesRequests;
 
-    // Filtros
     public string $search = '';
     public string $filterStatus = '';
     public string $filterMethod = '';
     public string $filterDateFrom = '';
     public string $filterDateTo = '';
-    public string $period = 'month'; // today, week, month, year, custom
+    public string $period = 'month';
 
-    // Listeners
     protected $listeners = [
         'paymentCreated' => '$refresh',
         'paymentUpdated' => '$refresh',
     ];
 
-    /**
-     * Mount
-     */
     public function mount(): void
     {
         $this->setPeriod('month');
     }
 
-    /**
-     * Cambiar período
-     */
     public function setPeriod(string $period): void
     {
         $this->period = $period;
@@ -64,9 +56,6 @@ class Index extends Component
         $this->resetPage();
     }
 
-    /**
-     * Reset filters
-     */
     public function updated($propertyName): void
     {
         if (in_array($propertyName, ['search', 'filterStatus', 'filterMethod', 'filterDateFrom', 'filterDateTo'])) {
@@ -74,9 +63,6 @@ class Index extends Component
         }
     }
 
-    /**
-     * Cancelar pago
-     */
     public function cancelPayment(int $paymentId): void
     {
         $payment = Payment::findOrFail($paymentId);
@@ -86,18 +72,13 @@ class Index extends Component
         session()->flash('message', 'Pago cancelado correctamente');
     }
 
-    /**
-     * Renderizar
-     */
     public function render(): View
     {
         $this->authorize('viewAny', Payment::class);
 
-        // Query base
         $query = Payment::query()
             ->with(['patient', 'creator', 'appointment']);
 
-        // Búsqueda por paciente
         if ($this->search) {
             $query->whereHas('patient', function ($q) {
                 $q->where('first_name', 'ilike', "%{$this->search}%")
@@ -106,7 +87,6 @@ class Index extends Component
             })->orWhere('payment_number', 'like', "%{$this->search}%");
         }
 
-        // Filtros
         if ($this->filterStatus) {
             $query->where('status', $this->filterStatus);
         }
@@ -123,12 +103,10 @@ class Index extends Component
             $query->where('payment_date', '<=', $this->filterDateTo);
         }
 
-        // Ordenar
         $query->orderBy('payment_date', 'desc')->orderBy('id', 'desc');
 
         $payments = $query->paginate(20);
 
-        // Calcular totales del período
         $totals = $this->calculateTotals();
 
         return view('livewire.payments.index', [
@@ -139,9 +117,6 @@ class Index extends Component
         ]);
     }
 
-    /**
-     * Calcular totales
-     */
     protected function calculateTotals(): array
     {
         $query = Payment::query();

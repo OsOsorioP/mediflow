@@ -19,7 +19,6 @@ class Create extends Component
 {
     use AuthorizesRequests;
 
-    // Propiedades del formulario
     public string $patient_id = '';
     public string $appointment_id = '';
     public string $amount = '';
@@ -30,13 +29,8 @@ class Create extends Component
     public string $description = '';
     public string $reference_number = '';
     public string $payment_date = '';
-
-    // Opciones
     public array $appointments = [];
 
-    /**
-     * Mount
-     */
     public function mount(?int $patientId = null, ?int $appointmentId = null): void
     {
         $this->payment_date = today()->format('Y-m-d');
@@ -56,9 +50,6 @@ class Create extends Component
         }
     }
 
-    /**
-     * Reglas de validación
-     */
     protected function rules(): array
     {
         return [
@@ -75,9 +66,6 @@ class Create extends Component
         ];
     }
 
-    /**
-     * Mensajes de validación
-     */
     protected function messages(): array
     {
         return [
@@ -91,22 +79,15 @@ class Create extends Component
         ];
     }
 
-    /**
-     * Validación en tiempo real
-     */
     public function updated($propertyName): void
     {
         $this->validateOnly($propertyName);
 
-        // Cargar citas cuando cambia el paciente
         if ($propertyName === 'patient_id') {
             $this->loadAppointments();
         }
     }
 
-    /**
-     * Cargar citas del paciente
-     */
     public function loadAppointments(): void
     {
         if (!$this->patient_id) {
@@ -125,9 +106,6 @@ class Create extends Component
             ->toArray();
     }
 
-    /**
-     * Guardar pago
-     */
     public function save(): void
     {
         $this->authorize('create', Payment::class);
@@ -154,9 +132,6 @@ class Create extends Component
         session()->flash('message', 'Pago registrado correctamente - #' . $payment->payment_number);
     }
 
-    /**
-     * Renderizar
-     */
     public function render(): View
     {
         $patients = Patient::where('clinic_id', auth()->user()->clinic_id)
