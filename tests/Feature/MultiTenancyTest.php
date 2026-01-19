@@ -6,7 +6,6 @@ use App\Models\User;
 use App\Enums\UserRole;
 
 beforeEach(function () {
-    // Crear dos clínicas con usuarios
     $this->clinic1 = Clinic::factory()->create(['name' => 'Clinic 1']);
     $this->clinic2 = Clinic::factory()->create(['name' => 'Clinic 2']);
     
@@ -20,7 +19,6 @@ beforeEach(function () {
         'role' => UserRole::ADMIN,
     ]);
     
-    // Crear pacientes para cada clínica
     $this->patient1 = Patient::factory()->create(['clinic_id' => $this->clinic1->id]);
     $this->patient2 = Patient::factory()->create(['clinic_id' => $this->clinic2->id]);
 });
@@ -45,7 +43,6 @@ test('users cannot access patients from other clinics', function () {
 test('global scope filters patients by clinic automatically', function () {
     $this->actingAs($this->user1);
     
-    // El scope global debe filtrar automáticamente
     $count = Patient::count();
     
     expect($count)->toBe(1);

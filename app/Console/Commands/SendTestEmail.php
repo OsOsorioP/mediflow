@@ -12,25 +12,16 @@ use Illuminate\Support\Facades\Mail;
 
 class SendTestEmail extends Command
 {
-    /**
-     * The name and signature of the console command.
-     */
+
     protected $signature = 'email:test {type=confirmation} {appointment_id?}';
 
-    /**
-     * The console command description.
-     */
     protected $description = 'Enviar un email de prueba';
 
-    /**
-     * Execute the console command.
-     */
     public function handle(): int
     {
         $type = $this->argument('type');
         $appointmentId = $this->argument('appointment_id');
 
-        // Obtener una cita (la primera si no se especifica)
         $appointment = $appointmentId 
             ? Appointment::findOrFail($appointmentId)
             : Appointment::with(['patient', 'doctor', 'clinic'])->first();

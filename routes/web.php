@@ -37,6 +37,7 @@ Route::middleware(['auth', 'tenant', 'verified'])->group(function () {
     // Rutas de citas
     Route::get('/appointments', AppointmentsIndex::class)->name('appointments.index');
     Route::get('/appointments/create', \App\Livewire\Appointments\Create::class)->name('appointments.create');
+    Route::get('/appointments/{appointment}/edit', \App\Livewire\Appointments\Edit::class)->name('appointments.edit');
 
     // Descargar PDF de receta
     Route::get('/medical-records/{record}/prescription/download', function (MedicalRecord $record) {
@@ -49,7 +50,7 @@ Route::middleware(['auth', 'tenant', 'verified'])->group(function () {
     // Ver PDF en el navegador
     Route::get('/medical-records/{record}/prescription/stream', function (MedicalRecord $record) {
         Gate::authorize('view', $record);
-        
+
         $action = new GeneratePrescriptionPdfAction();
         return $action->stream($record);
     })->name('medical-records.prescription.stream');
@@ -59,14 +60,14 @@ Route::middleware(['auth', 'tenant', 'verified'])->group(function () {
 
     // Registrar pago
     Route::get('/payments/create', PaymentsCreate::class)->name('payments.create');
-    
+
     // Descargar recibo PDF
     Route::get('/payments/{payment}/receipt/download', function (Payment $payment) {
         Gate::authorize('view', $payment);
-        
+
         $action = new GenerateReceiptPdfAction();
         return $action->download($payment);
     })->name('payments.receipt.download');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

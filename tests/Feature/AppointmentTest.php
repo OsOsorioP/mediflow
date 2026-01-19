@@ -19,7 +19,6 @@ beforeEach(function () {
     $this->patient1 = Patient::factory()->create(['clinic_id' => $this->clinic->id]);
     $this->patient2 = Patient::factory()->create(['clinic_id' => $this->clinic->id]);
     
-    // Crear horarios de atención (Lunes a Viernes)
     for ($day = 1; $day <= 5; $day++) {
         WorkingHours::create([
             'clinic_id' => $this->clinic->id,
@@ -55,7 +54,6 @@ test('prevents double booking for same doctor', function () {
     $action = new ScheduleAppointmentAction();
     $scheduledAt = Carbon::parse('next monday 10:00');
     
-    // Primera cita
     $action->execute([
         'patient_id' => $this->patient1->id,
         'user_id' => $this->doctor->id,
@@ -63,11 +61,10 @@ test('prevents double booking for same doctor', function () {
         'duration_minutes' => 30,
     ]);
     
-    // Intentar crear otra cita al mismo tiempo
     $action->execute([
         'patient_id' => $this->patient2->id,
         'user_id' => $this->doctor->id,
-        'scheduled_at' => $scheduledAt, // Misma hora
+        'scheduled_at' => $scheduledAt, 
         'duration_minutes' => 30,
     ]);
 })->throws(\Illuminate\Validation\ValidationException::class);
@@ -75,7 +72,6 @@ test('prevents double booking for same doctor', function () {
 test('prevents appointments outside working hours', function () {
     $action = new ScheduleAppointmentAction();
     
-    // Intentar agendar a las 6 AM (fuera de horario)
     $action->execute([
         'patient_id' => $this->patient1->id,
         'user_id' => $this->doctor->id,
@@ -99,7 +95,6 @@ test('detects overlapping appointments correctly', function () {
     $action = new ScheduleAppointmentAction();
     $baseTime = Carbon::parse('next monday 10:00');
     
-    // Crear cita de 10:00 a 10:30
     $action->execute([
         'patient_id' => $this->patient1->id,
         'user_id' => $this->doctor->id,
@@ -107,7 +102,6 @@ test('detects overlapping appointments correctly', function () {
         'duration_minutes' => 30,
     ]);
     
-    // Intentar crear cita de 10:15 a 10:45 (se superpone)
     $action->execute([
         'patient_id' => $this->patient2->id,
         'user_id' => $this->doctor->id,

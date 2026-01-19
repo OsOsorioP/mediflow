@@ -33,7 +33,6 @@ test('sensitive medical data is encrypted in database', function () {
         'consultation_date' => today(),
     ]);
     
-    // Verificar que en la DB está encriptado
     $rawRecord = DB::table('medical_records')->find($record->id);
     
     expect($rawRecord->symptoms)->not->toBe($sensitiveData)
@@ -54,10 +53,8 @@ test('encrypted data is automatically decrypted when accessed', function () {
         'consultation_date' => today(),
     ]);
     
-    // Recargar desde DB
     $record->refresh();
-    
-    // Debe desencriptar automáticamente
+
     expect($record->symptoms)->toBe($originalSymptoms)
         ->and($record->diagnosis)->toBe($originalDiagnosis);
 });
@@ -71,7 +68,7 @@ test('null values are handled correctly in encryption', function () {
         'diagnosis' => 'Diagnóstico simple',
         'clinical_notes' => 'Notas',
         'consultation_date' => today(),
-        'prescriptions' => null, // Campo nullable
+        'prescriptions' => null,
     ]);
     
     expect($record->prescriptions)->toBeNull();
