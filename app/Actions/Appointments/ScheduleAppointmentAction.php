@@ -15,20 +15,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
-/**
- * Clase encargada de la lógica de negocio para agendar citas médicas.
- * Asegura que no existan traslapes de horarios y que se respete la jornada laboral.
- */
 class ScheduleAppointmentAction
 {
-    /**
-     * Ejecuta el proceso de agendado de una cita.
-     * 
-     * @param array $data Datos de la cita (user_id, patient_id, scheduled_at, duration_minutes, etc).
-     * @return Appointment El modelo de la cita creada.
-     * @throws ValidationException Si falla alguna validación de disponibilidad.
-     * @throws \Exception Si no hay contexto de clínica.
-     */
     public function execute(array $data): Appointment
     {
         $scheduledAt = Carbon::parse($data['scheduled_at']);
@@ -43,23 +31,18 @@ class ScheduleAppointmentAction
         }
 
         return DB::transaction(function () use ($data, $scheduledAt, $duration, $doctorId, $patientId, $clinicId) {
-            // 1. No permitir citas en el pasado
             if ($scheduledAt->isPast()) {
                 throw ValidationException::withMessages([
                     'scheduled_at' => 'No se pueden agendar citas en el pasado.',
                 ]);
             }
 
-            // 2. Verificar que la clínica esté abierta en ese horario
             $this->validateWorkingHours($clinicId, $scheduledAt, $duration);
 
-            // 3. Verificar que el médico no tenga otra cita (Bloqueo pesimista para evitar condiciones de carrera)
             $this->validateDoctorAvailability($doctorId, $scheduledAt, $duration);
 
-            // 4. Verificar que el paciente no tenga otra cita activa
             $this->validatePatientAvailability($patientId, $scheduledAt, $duration);
 
-            // 5. Persistir la cita en la base de datos
             $appointment = Appointment::create([
                 'clinic_id' => $clinicId,
                 'patient_id' => $patientId,
@@ -79,13 +62,6 @@ class ScheduleAppointmentAction
         });
     }
 
-    /**
-     * Valida si el horario solicitado entra dentro de la configuración de la clínica.
-     * 
-     * @param int $clinicId
-     * @param Carbon $scheduledAt
-     * @param int $duration
-     */
     protected function validateWorkingHours(int $clinicId, Carbon $scheduledAt, int $duration): void
     {
         $dayOfWeek = $scheduledAt->dayOfWeek;
@@ -115,13 +91,6 @@ class ScheduleAppointmentAction
         }
     }
 
-    /**
-     * Comprueba si el médico tiene huecos libres usando bloqueo de registros.
-     * 
-     * @param int $doctorId
-     * @param Carbon $scheduledAt
-     * @param int $duration
-     */
     protected function validateDoctorAvailability(int $doctorId, Carbon $scheduledAt, int $duration): void
     {
         $endTime = $scheduledAt->copy()->addMinutes($duration);
@@ -142,13 +111,6 @@ class ScheduleAppointmentAction
         }
     }
 
-    /**
-     * Comprueba si el paciente tiene otra cita que choque.
-     * 
-     * @param int $patientId
-     * @param Carbon $scheduledAt
-     * @param int $duration
-     */
     protected function validatePatientAvailability(int $patientId, Carbon $scheduledAt, int $duration): void
     {
         $endTime = $scheduledAt->copy()->addMinutes($duration);
@@ -172,14 +134,6 @@ class ScheduleAppointmentAction
         }
     }
 
-    /**
-     * Genera una lista de horas disponibles para un médico en una fecha específica.
-     * 
-     * @param int $doctorId ID del médico.
-     * @param Carbon $date Fecha a consultar.
-     * @param int $slotDuration Duración de cada espacio en minutos.
-     * @return array Lista de strings con horas disponibles (H:i).
-     */
     public function getAvailableSlots(int $doctorId, Carbon $date, int $slotDuration = 30): array
     {
         $clinicId = app(TenantManager::class)->getClinicId();
@@ -199,10 +153,8 @@ class ScheduleAppointmentAction
             return [];
         }
 
-        // Obtener todos los slots teóricos del día (método interno del modelo WorkingHours)
         $allSlots = $workingHours->getAvailableSlots($slotDuration);
 
-        // Obtener citas ya agendadas para filtrar
         $existingAppointments = Appointment::query()
             ->where('user_id', $doctorId)
             ->whereIn('status', AppointmentStatus::activeStatuses())

@@ -19,31 +19,22 @@ class Index extends Component
 {
     use WithPagination, AuthorizesRequests;
 
-    // Filtros
     public string $filterDate = '';
     public string $filterStatus = '';
     public string $filterDoctor = '';
     public string $search = '';
-    public string $viewMode = 'list'; // list, calendar
+    public string $viewMode = 'list';
 
-    // Listeners
     protected $listeners = [
         'appointmentCreated' => '$refresh',
         'appointmentUpdated' => '$refresh',
     ];
 
-    /**
-     * Mount
-     */
     public function mount(): void
     {
-        // Por defecto, mostrar citas de hoy
         $this->filterDate = today()->format('Y-m-d');
     }
 
-    /**
-     * Resetear paginación cuando cambian los filtros
-     */
     public function updatedFilterDate(): void
     {
         $this->resetPage();
@@ -64,17 +55,11 @@ class Index extends Component
         $this->resetPage();
     }
 
-    /**
-     * Cambiar vista
-     */
     public function setViewMode(string $mode): void
     {
         $this->viewMode = $mode;
     }
 
-    /**
-     * Confirmar cita
-     */
     public function confirmAppointment(int $appointmentId): void
     {
         $appointment = Appointment::findOrFail($appointmentId);
@@ -84,9 +69,6 @@ class Index extends Component
         session()->flash('message', 'Cita confirmada');
     }
 
-    /**
-     * Completar cita
-     */
     public function completeAppointment(int $appointmentId): void
     {
         $appointment = Appointment::findOrFail($appointmentId);
@@ -96,9 +78,6 @@ class Index extends Component
         session()->flash('message', 'Cita marcada como completada');
     }
 
-    /**
-     * Cancelar cita
-     */
     public function cancelAppointment(int $appointmentId, string $reason = ''): void
     {
         $appointment = Appointment::findOrFail($appointmentId);
@@ -108,9 +87,6 @@ class Index extends Component
         session()->flash('message', 'Cita cancelada');
     }
 
-    /**
-     * Marcar como no asistió
-     */
     public function markAsNoShow(int $appointmentId): void
     {
         $appointment = Appointment::findOrFail($appointmentId);
@@ -120,33 +96,25 @@ class Index extends Component
         session()->flash('message', 'Cita marcada como no asistió');
     }
 
-    /**
-     * Renderizar
-     */
     public function render(): View
     {
         $this->authorize('viewAny', Appointment::class);
 
-        // Query base
         $query = Appointment::query()
             ->with(['patient', 'doctor', 'creator']);
 
-        // Filtrar por fecha
         if ($this->filterDate) {
             $query->whereDate('scheduled_at', $this->filterDate);
         }
 
-        // Filtrar por estado
         if ($this->filterStatus) {
             $query->where('status', $this->filterStatus);
         }
 
-        // Filtrar por médico
         if ($this->filterDoctor) {
             $query->where('user_id', $this->filterDoctor);
         }
 
-        // Búsqueda por nombre de paciente
         if ($this->search) {
             $query->whereHas('patient', function ($q) {
                 $q->where('first_name', 'ilike', "%{$this->search}%")
@@ -154,18 +122,15 @@ class Index extends Component
             });
         }
 
-        // Ordenar
         $query->orderBy('scheduled_at', 'asc');
 
         $appointments = $query->paginate(20);
 
-        // Obtener médicos para el filtro
         $doctors = User::where('clinic_id', auth()->user()->clinic_id)
             ->where('is_active', true)
             ->orderBy('name')
             ->get();
 
-        // Estadísticas del día
         $todayStats = $this->getTodayStats();
 
         return view('livewire.appointments.index', [
@@ -176,9 +141,6 @@ class Index extends Component
         ]);
     }
 
-    /**
-     * Obtener estadísticas del día seleccionado
-     */
     protected function getTodayStats(): array
     {
         $date = $this->filterDate ? Carbon::parse($this->filterDate) : today();

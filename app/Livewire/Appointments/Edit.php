@@ -5,21 +5,24 @@ declare(strict_types=1);
 namespace App\Livewire\Appointments;
 
 use App\Actions\Appointments\ScheduleAppointmentAction;
+use App\Enums\AppointmentStatus;
 use App\Enums\AppointmentType;
 use App\Models\Appointment;
 use App\Models\Patient;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 
 #[Layout('layouts.app')]
-class Create extends Component 
+class Edit extends Component
 {
     use AuthorizesRequests;
+
+    public Appointment $appointment;
 
     public string $patient_id = '';
     public string $user_id = '';
@@ -32,18 +35,22 @@ class Create extends Component
 
     public array $availableSlots = [];
 
-    public function mount(): void
+    public function mount(Appointment $appointment): void
     {
-        $this->appointment_date = today()->format('Y-m-d');
-        
-        $doctors = User::where('clinic_id', Auth::user()->clinic_id)
-            ->where('is_active', true)
-            ->get();
-        
-        if ($doctors->count() === 1) {
-            $this->user_id = (string) $doctors->first()->id;
-            $this->loadAvailableSlots();
-        }
+        $this->authorize('update', $appointment);
+
+        $this->appointment = $appointment;
+
+        $this->patient_id = (string) $appointment->patient_id;
+        $this->user_id = (string) $appointment->user_id;
+        $this->appointment_date = $appointment->scheduled_at->format('Y-m-d');
+        $this->appointment_time = $appointment->scheduled_at->format('H:i');
+        $this->duration_minutes = (string) $appointment->duration_minutes;
+        $this->appointment_type = $appointment->appointment_type->value ?? 'consultation';
+        $this->reason = $appointment->reason ?? '';
+        $this->notes = $appointment->notes ?? '';
+
+        $this->loadAvailableSlots();
     }
 
     protected function rules(): array
@@ -51,7 +58,7 @@ class Create extends Component
         return [
             'patient_id' => 'required|exists:patients,id',
             'user_id' => 'required|exists:users,id',
-            'appointment_date' => 'required|date|after_or_equal:today',
+            'appointment_date' => 'required|date', // Permitir fechas pasadas si ya es una cita pasada? Asumimos que no se editan citas pasadas para moverlas al futuro sin validación, pero por ahora simple.
             'appointment_time' => 'required',
             'duration_minutes' => 'required|integer|min:10|max:240',
             'appointment_type' => 'nullable|string',
@@ -66,7 +73,6 @@ class Create extends Component
             'patient_id.required' => 'Debe seleccionar un paciente',
             'user_id.required' => 'Debe seleccionar un médico',
             'appointment_date.required' => 'La fecha es obligatoria',
-            'appointment_date.after_or_equal' => 'No se pueden agendar citas en el pasado',
             'appointment_time.required' => 'La hora es obligatoria',
             'duration_minutes.required' => 'La duración es obligatoria',
         ];
@@ -75,7 +81,7 @@ class Create extends Component
     public function updated($propertyName): void
     {
         $this->validateOnly($propertyName);
-        
+
         if (in_array($propertyName, ['appointment_date', 'user_id', 'duration_minutes'])) {
             $this->loadAvailableSlots();
         }
@@ -92,12 +98,23 @@ class Create extends Component
             $action = new ScheduleAppointmentAction();
             $date = Carbon::parse($this->appointment_date);
             $duration = (int) ($this->duration_minutes ?: 30);
-            
+
             $this->availableSlots = $action->getAvailableSlots(
                 (int) $this->user_id,
                 $date,
                 $duration
             );
+
+            if (
+                (int)$this->user_id === $this->appointment->user_id &&
+                $this->appointment_date === $this->appointment->scheduled_at->format('Y-m-d')
+            ) {
+                $currentSlot = $this->appointment->scheduled_at->format('H:i');
+                if (!in_array($currentSlot, $this->availableSlots)) {
+                    $this->availableSlots[] = $currentSlot;
+                    sort($this->availableSlots);
+                }
+            }
         } catch (\Exception $e) {
             $this->availableSlots = [];
         }
@@ -110,15 +127,14 @@ class Create extends Component
 
     public function save(): void
     {
-        $this->authorize('create', Appointment::class);
+        $this->authorize('update', $this->appointment);
 
         $validated = $this->validate();
 
         try {
             $scheduledAt = Carbon::parse("{$this->appointment_date} {$this->appointment_time}");
 
-            $action = new ScheduleAppointmentAction();
-            $appointment = $action->execute([
+            $this->appointment->update([
                 'patient_id' => $this->patient_id,
                 'user_id' => $this->user_id,
                 'scheduled_at' => $scheduledAt,
@@ -128,32 +144,30 @@ class Create extends Component
                 'notes' => $this->notes,
             ]);
 
-            $this->dispatch('appointmentCreated');
+            $this->dispatch('appointmentUpdated');
             $this->dispatch('closeModal');
 
-            session()->flash('message', 'Cita agendada correctamente. Se enviará un email de confirmación al paciente.');
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            foreach ($e->errors() as $field => $messages) {
-                foreach ($messages as $message) {
-                    $this->addError($field, $message);
-                }
-            }
+            session()->flash('message', 'Cita actualizada correctamente.');
+        } catch (\Exception $e) {
+            $this->addError('base', 'Error al actualizar la cita: ' . $e->getMessage());
         }
     }
 
     public function render(): View
     {
-        $patients = Patient::where('clinic_id', Auth::user()->clinic_id)
+        $user = auth()->user();
+
+        $patients = Patient::where('clinic_id', $user->clinic_id)
             ->where('is_active', true)
             ->orderBy('first_name')
             ->get();
 
-        $doctors = User::where('clinic_id', Auth::user()->clinic_id)
+        $doctors = User::where('clinic_id', $user->clinic_id)
             ->where('is_active', true)
             ->orderBy('name')
             ->get();
 
-        return view('livewire.appointments.create', [
+        return view('livewire.appointments.edit', [
             'patients' => $patients,
             'doctors' => $doctors,
             'appointmentTypes' => AppointmentType::options(),

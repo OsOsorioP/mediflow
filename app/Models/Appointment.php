@@ -41,161 +41,101 @@ class Appointment extends Model
         'appointment_type' => AppointmentType::class,
     ];
 
-    /**
-     * Relación: Paciente
-     */
     public function patient(): BelongsTo
     {
         return $this->belongsTo(Patient::class);
     }
 
-    /**
-     * Relación: Profesional/Médico asignado
-     */
     public function doctor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    /**
-     * Relación: Usuario que creó la cita
-     */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    /**
-     * Relación: Clínica
-     */
     public function clinic(): BelongsTo
     {
         return $this->belongsTo(Clinic::class);
     }
 
-    /**
-     * Accessor: Hora de finalización
-     */
     public function getEndTimeAttribute(): Carbon
     {
         return $this->scheduled_at->copy()->addMinutes($this->duration_minutes);
     }
 
-    /**
-     * Accessor: Fecha formateada
-     */
     public function getFormattedDateAttribute(): string
     {
         return $this->scheduled_at->locale('es')->isoFormat('dddd D [de] MMMM [de] YYYY');
     }
 
-    /**
-     * Accessor: Hora formateada
-     */
     public function getFormattedTimeAttribute(): string
     {
         return $this->scheduled_at->format('H:i') . ' - ' . $this->end_time->format('H:i');
     }
 
-    /**
-     * Scope: Citas activas (pendientes o confirmadas)
-     */
     public function scopeActive($query)
     {
         return $query->whereIn('status', AppointmentStatus::activeStatuses());
     }
 
-    /**
-     * Scope: Citas por estado
-     */
     public function scopeStatus($query, AppointmentStatus $status)
     {
         return $query->where('status', $status);
     }
 
-    /**
-     * Scope: Citas futuras
-     */
     public function scopeUpcoming($query)
     {
         return $query->where('scheduled_at', '>', now());
     }
 
-    /**
-     * Scope: Citas pasadas
-     */
     public function scopePast($query)
     {
         return $query->where('scheduled_at', '<', now());
     }
 
-    /**
-     * Scope: Citas de hoy
-     */
     public function scopeToday($query)
     {
         return $query->whereDate('scheduled_at', today());
     }
 
-    /**
-     * Scope: Citas en un rango de fechas
-     */
     public function scopeBetweenDates($query, Carbon $start, Carbon $end)
     {
         return $query->whereBetween('scheduled_at', [$start, $end]);
     }
 
-    /**
-     * Scope: Citas de un médico específico
-     */
     public function scopeForDoctor($query, int $doctorId)
     {
         return $query->where('user_id', $doctorId);
     }
 
-    /**
-     * Verifica si la cita está en el pasado
-     */
     public function isPast(): bool
     {
         return $this->scheduled_at->isPast();
     }
 
-    /**
-     * Verifica si la cita es hoy
-     */
     public function isToday(): bool
     {
         return $this->scheduled_at->isToday();
     }
 
-    /**
-     * Verifica si la cita está dentro de las próximas X horas
-     */
     public function isWithinHours(int $hours): bool
     {
         return $this->scheduled_at->isBetween(now(), now()->addHours($hours));
     }
 
-    /**
-     * Verifica si se puede modificar la cita
-     */
     public function canBeModified(): bool
     {
         return $this->status->canBeModified() && !$this->isPast();
     }
 
-    /**
-     * Verifica si se puede cancelar
-     */
     public function canBeCancelled(): bool
     {
         return $this->status->canBeCancelled() && !$this->isPast();
     }
 
-    /**
-     * Confirmar la cita
-     */
     public function confirm(): bool
     {
         if ($this->status !== AppointmentStatus::PENDING) {
@@ -211,9 +151,6 @@ class Appointment extends Model
         return $result;
     }
 
-    /**
-     * Completar la cita
-     */
     public function complete(): bool
     {
         if (!$this->status->isActive()) {
@@ -223,9 +160,6 @@ class Appointment extends Model
         return (bool) $this->update(['status' => AppointmentStatus::COMPLETED]);
     }
 
-    /**
-     * Cancelar la cita
-     */
     public function cancel(string|null $reason = null): bool
     {
         if (!$this->canBeCancelled()) {
@@ -238,9 +172,6 @@ class Appointment extends Model
         ]);
     }
 
-    /**
-     * Marcar como no asistió
-     */
     public function markAsNoShow(): bool
     {
         if (!$this->status->isActive() || !$this->isPast()) {
@@ -250,17 +181,11 @@ class Appointment extends Model
         return (bool) $this->update(['status' => AppointmentStatus::NO_SHOW]);
     }
 
-    /**
-     * Relación: Una cita puede tener un pago
-     */
     public function payment(): HasOne
     {
         return $this->hasOne(Payment::class);
     }
 
-    /**
-     * Verificar si la cita está pagada
-     */
     public function isPaid(): bool
     {
         return $this->payment()->where('status', PaymentStatus::COMPLETED)->exists();

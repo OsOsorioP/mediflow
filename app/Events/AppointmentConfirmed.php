@@ -13,12 +13,9 @@ class AppointmentConfirmed
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    /**
-     * Create a new event instance.
-     */
     public function __construct(
         public Appointment $appointment
     ) {
-        //
+        
     }
 }
