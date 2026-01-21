@@ -1,9 +1,7 @@
 <div class="flex flex-col min-w-full gap-6">
     {{-- Header con selector de período --}}
     <div class="">
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="text-2xl font-bold text-gray-900">Dashboard</h2>
-            
+        <x-title-section title="Dashboard" description="Información general de la clínica">
             <div class="flex gap-2">
                 <button 
                     wire:click="setPeriod('week')"
@@ -21,7 +19,7 @@
                     Este Año
                 </button>
             </div>
-        </div>
+        </x-title-section>
 
         {{-- KPIs Grid --}}
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

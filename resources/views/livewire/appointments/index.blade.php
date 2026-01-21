@@ -1,16 +1,13 @@
 <div>
     {{-- Header --}}
     <div class="mb-6">
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="text-2xl font-bold text-gray-900">Agenda de Citas</h2>
-
+        <x-title-section title="Agenda de Citas" description="Administra las citas de la clínica.">
             @can('create', App\Models\Appointment::class)
-                <a href="{{ route('appointments.create') }}"
-                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium">
-                    + Nueva Cita
-                </a>
+                <x-button.button-link href="{{ route('appointments.create') }}" icon="<svg class='-ml-1 mr-2 h-5 w-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                    <path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M12 6v6m0 0v6m0-6h6m-6 0H6' />
+                </svg>" text="Nueva Cita" />
             @endcan
-        </div>
+        </x-title-section>
 
         {{-- Estadísticas del día --}}
         <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">

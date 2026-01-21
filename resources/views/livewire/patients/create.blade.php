@@ -1,4 +1,4 @@
-<div class="p-6">
+<div class="p-6 bg-white rounded-xl shadow-lg">
     <h3 class="text-lg font-semibold text-gray-900 mb-6">Crear Nuevo Paciente</h3>
 
     <form wire:submit="save">
@@ -288,7 +288,7 @@
         <div class="flex justify-end gap-3 pt-4 border-t">
             <button 
                 type="button"
-                wire:click="$dispatch('closeModal')"
+                wire:navigate="{{ route('patients.index') }}"
                 class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
             >
                 Cancelar
