@@ -8,6 +8,8 @@ use App\Models\Clinic;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Content;
+use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
 class UserInvitation extends Mailable
@@ -20,9 +22,31 @@ class UserInvitation extends Mailable
         public Clinic $clinic
     ) {}
 
-    public function build(): self
+    public function envelope(): Envelope
     {
-        return $this->subject('Invitation to join ' . $this->clinic->name)
-            ->markdown('emails.users.invitation');
+        return new Envelope(
+            subject: "Invitación a {$this->clinic->name} - MediFlow",
+        );
+    }
+
+    public function content(): Content
+    {
+        return new Content(
+            view: 'emails.users.invitation',
+            
+            with: [
+                'userName' => $this->user->name,
+                'userEmail' => $this->user->email,
+                'temporaryPassword' => $this->temporaryPassword,
+                'clinicName' => $this->clinic->name,
+                'loginUrl' => route('login'),
+                'roleName' => $this->user->role->label(),
+            ],
+        );
+    }
+
+    public function attachments(): array
+    {
+        return [];
     }
 }
